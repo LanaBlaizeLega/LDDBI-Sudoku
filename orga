@@ -15,5 +15,5 @@ InGame
     -si cette case n'est pas un digit de la grid de départ, pouvoir ajouter un chiffre dedans
     -pouvoir supprimer un digit d'une case (qui n'est pas parmis les digits de départ)
     -verifier si ce chiffre est possible , si non, mettre en rouge ce chiffre et tout les autre chiffres avec lesquels il est en conflit
-
-    test test
+    -verifier si c'est la solution
+ 
