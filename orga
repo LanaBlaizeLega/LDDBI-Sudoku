@@ -1,16 +1,16 @@
 Plusieurs missions : 
-Generer le sudoku.
+Generer le sudoku. (Abi)
     -prendre en input un int qui va de min digit (17) à max digit (cela permet d'ajuster la difficulté)
     -Doit avoir une solution unique
     -Doit avoir en outpout deux array 9*9 , la soluce , les digits de départ
 
-Main Menu/Pause 
+Main Menu/Pause (Félix)
     -Pouvoir lancer un nouveau sudoku avec un niveau de difficulté choisis(le paramètre à la sortie est un int allant de min digit à max digit)
     -lancer un timer pour ce sudoku ainsi que generer une nouvelle grid
     -pouvoir quitter le sudoku en cours et le sauver, ainsi que son timer
     -pouvoir charger un sudoku déja commencé
 
-InGame
+InGame (Lana)
     -pouvoir selectionner une case du sudoku
     -si cette case n'est pas un digit de la grid de départ, pouvoir ajouter un chiffre dedans
     -pouvoir supprimer un digit d'une case (qui n'est pas parmis les digits de départ)
