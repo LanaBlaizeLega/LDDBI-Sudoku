@@ -2,13 +2,15 @@ import tkinter as tk
 import random as random
 import numpy as np
 
-MARGE = 30
+MARGE = 20
 COTE = 50
 LONGUEUR = LARGEUR = MARGE * 2 + COTE * 9
 
 racine = tk.Tk()
 racine.title("Sudoku")
-racine.geometry('600x600')
+
+grille = tk.Canvas(racine, height = LONGUEUR, width=LARGEUR,)
+grille.pack(fill="both", side="top")
 
 matDefaut = np.array([
     [3,9,0,0,0,0,0,0,0],
@@ -30,15 +32,16 @@ def creer_tableau(mat):
     return tableau
 creer_tableau(matDefaut)
 
-def generer_grille(tableau)
-canvas.delete("nombres")
-for r in range(10):
-    for c in range(10):
-        ans = tableau[r][c]
-        if ans != 0:
-            x = MARGE + r * COTE + COTE / 2
-            y = MARGE + c * COTE + COTE / 2
-            orig = tableau[r][c]
+def generer_grille(tableau):
+    canvas.delete("nombres")
+    for r in range(10):
+        for c in range(10):
+            ans = tableau[r][c]
+            if ans != 0:
+                x = MARGE + r * COTE + COTE / 2
+                y = MARGE + c * COTE + COTE / 2
+                orig = tableau[r][c]
+                
 
 
 racine.mainloop()
