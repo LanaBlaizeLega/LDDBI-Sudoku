@@ -51,4 +51,5 @@ print(L)
 print(Tableau)
 
 
+#Faut que tu retire de L les nombre présent dans ta case et que tu check la colonne avant d'ajouter
 
