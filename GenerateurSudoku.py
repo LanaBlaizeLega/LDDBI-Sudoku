@@ -8,6 +8,8 @@ import random as r
 #fonction random first row(tablde0)
 
 #fonction qui génère des nombres
+
+
 Tableau = np.zeros((9,9))
 print(Tableau)
 
@@ -25,6 +27,28 @@ def LigneAleatoire(ligne):
         Tableau[ligne][i] = GenEntier()
     Reset()
 
-LigneAleatoire(0)
+def CheckColonne(a,b):
+    for i in range (0,8):
+        if Tableau[a][i] == Tableau[b][i]:
+            return True
+    return False
+
+
+def InitialisationLignes():
+
+    LigneAleatoire(0)
+    LigneAleatoire(3)
+    LigneAleatoire(6)
+
+    while CheckColonne(0,3) :
+        LigneAleatoire(3) 
+
+    while CheckColonne(0,6) and CheckColonne(3,6):
+        LigneAleatoire(6)
+
+InitialisationLignes()
 print(L)
 print(Tableau)
+
+
+
