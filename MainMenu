@@ -13,43 +13,49 @@ BGCOL3 = "#9AC1A2"
 #region FONCTION
 
 def Settings():
-    print("SettingsMenu")
+    SettingsWindow = tk.Toplevel()
+    SettingsWindow.geometry('150x150')
+    newlabel = tk.Label(SettingsWindow, text = "Settings Window")
+    newlabel.pack()
 
 def Play():
     print("ChoosingDifficultyMenu")
+
 
 def Reload():
     print("ReloadASudokuMenu")
 
 def PackButtons():
-    button2.pack(pady=10)
+    button2.pack(pady =10)
     button3.pack(pady=10)
     button.pack(pady=10)
 
+def LeaveApp():
+    pass
+#destroy etc
+
+    
 #enregion
-root = tk.Tk()
-root.geometry("1600x900")
-frame = tk.Frame(root)
-frame.pack()
-root.title("SudokuMaster")
 
 
-button = tk.Button(frame, text = "Settings", command = Settings,
-                fg = TXTCOL1, font = "Verdana 14",
-                bd = 2, bg = "White")
+MainRoot = tk.Tk()
+MainRoot.geometry("1600x900")
+MainRoot.title("SudokuMaster")
 
-button2 = tk.Button(frame, text = "Play", command = Play,
-                fg = TXTCOL1, font = "Verdana 14",
-                bd = 2, bg = "White")
 
-button3 = tk.Button(frame, text = "Reload", command = Reload,
-                fg = TXTCOL1, font = "Verdana 14",
-                bd = 2, bg = "White")
+button = tk.Button(MainRoot, text = "Settings", command = Settings,
+                fg = TXTCOL1, font = "Verdana 20", bg = BGCOL3)
 
-MainTitle = tk.Label(frame, text = "MainTitle", fg="red", bg="#93B1A7")
+button2 = tk.Button(MainRoot, text = "Play", command = Play,
+                fg = TXTCOL1, font = "Verdana 54", bg = BGCOL2)
 
-MainTitle.pack(side="top", fill="x")
+button3 = tk.Button(MainRoot, text = "Reload", command = Reload,
+                fg = TXTCOL1, font = "Verdana 24", bg = BGCOL2)
+
+MainTitle = tk.Label(MainRoot, text = "MainTitle", fg=TXTCOL2, bg=BGCOL1, font = "Verdana 100")
+
+MainTitle.pack(side="top", fill= tk.X)
 
 
 PackButtons()
-root.mainloop()
+MainRoot.mainloop()
