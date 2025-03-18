@@ -1,0 +1,55 @@
+import tkinter as tk
+
+#region COLORS_CONSTANT
+
+TXTCOL1 = "#FB8423"
+TXTCOL2 = "#ED9B40"
+BGCOL1 = "#93B1A7"
+BGCOL2 = "#7A918D"
+BGCOL3 = "#9AC1A2"
+
+#endregion
+
+#region FONCTION
+
+def Settings():
+    print("SettingsMenu")
+
+def Play():
+    print("ChoosingDifficultyMenu")
+
+def Reload():
+    print("ReloadASudokuMenu")
+
+def PackButtons():
+    button2.pack(pady=10)
+    button3.pack(pady=10)
+    button.pack(pady=10)
+
+#enregion
+root = tk.Tk()
+root.geometry("1600x900")
+frame = tk.Frame(root)
+frame.pack()
+root.title("SudokuMaster")
+
+
+button = tk.Button(frame, text = "Settings", command = Settings,
+                fg = TXTCOL1, font = "Verdana 14",
+                bd = 2, bg = "White")
+
+button2 = tk.Button(frame, text = "Play", command = Play,
+                fg = TXTCOL1, font = "Verdana 14",
+                bd = 2, bg = "White")
+
+button3 = tk.Button(frame, text = "Reload", command = Reload,
+                fg = TXTCOL1, font = "Verdana 14",
+                bd = 2, bg = "White")
+
+MainTitle = tk.Label(frame, text = "MainTitle", fg="red", bg="#93B1A7")
+
+MainTitle.pack(side="top", fill="x")
+
+
+PackButtons()
+root.mainloop()
