@@ -15,6 +15,7 @@ print(Tableau)
 
 L = [1,2,3,4,5,6,7,8,9]
 
+
 def Reset():
     for i in range(1,10):
         L.append(i)
@@ -27,10 +28,53 @@ def LigneAleatoire(ligne):
         Tableau[ligne][i] = GenEntier()
     Reset()
 
-def CheckColonne(a,b):
+
+def CompareLigne(a,b):
     for i in range (0,8):
         if Tableau[a][i] == Tableau[b][i]:
+            # print("true")
             return True
+    # print("false")
+    return False
+
+def CompareColonne(a,b):
+    for i in range (0,8):
+        if Tableau[i][a] == Tableau[i][b]:
+            # print("true")
+            return True
+    # print("false")
+    return False
+
+
+def ResetLAvecCarre(lin, col):
+    list_carre = []
+    for i in range(lin,lin+2):
+        for j in range(col,col+2):
+            list_carre.append(Tableau[i][j])
+    while 0 in list_carre:
+        list_carre.remove(0)
+    # return len(list_carre) != len(set(list_carre))
+    
+    for value in L:
+        while value in list_carre:
+            L.remove(value)
+
+def CheckLigne(x,y):
+    for i in range(0,8):
+        if i == x:
+            continue
+        else:
+            if Tableau[i][y] == Tableau[x][y]:
+                return True
+    return False
+
+def CheckColonne(x,y):
+    for i in range(0,8):
+        if i == y:
+            continue
+        else:
+            if Tableau[x][i] == Tableau[x][y]:
+                return True
     return False
 
 
@@ -40,16 +84,43 @@ def InitialisationLignes():
     LigneAleatoire(3)
     LigneAleatoire(6)
 
-    while CheckColonne(0,3) :
+    while CompareLigne(0,3) :
         LigneAleatoire(3) 
 
-    while CheckColonne(0,6) and CheckColonne(3,6):
+    while CompareLigne(0,6) or CompareLigne(3,6):
         LigneAleatoire(6)
 
+def IndiceCarre(i):
+    if i >= 6:
+        return 6
+    elif i <= 3:
+        return 0
+    else:
+        return 3
+
+def Completer():
+    for i in range(0, 9):
+        if i==0 or i==3 or i==6:
+            continue
+        else:   
+            for j in range(0,9):
+                carreX = IndiceCarre(i)
+                carreY = IndiceCarre(j)
+
+                while  CheckLigne(i,j) and CheckColonne(i,j):
+                    ResetLAvecCarre(carreX,carreY)
+                    Tableau[i][j] = GenEntier()
+                   
+
+
+            
+
+
+
+
 InitialisationLignes()
+Completer()
 print(L)
 print(Tableau)
 
-
-#Faut que tu retire de L les nombre présent dans ta case et que tu check la colonne avant d'ajouter
 
