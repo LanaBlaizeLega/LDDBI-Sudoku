@@ -2,6 +2,7 @@ import tkinter as tk
 import random as random
 import numpy as np
 
+
 MARGE = 20
 COTE = 50
 LONGUEUR = LARGEUR = MARGE * 2 + COTE * 9
@@ -30,18 +31,24 @@ def creer_tableau(mat):
         for elem in ligne:
             tableau[-1].append(int(elem))
     return tableau
-creer_tableau(matDefaut)
 
 def generer_grille(tableau):
-    canvas.delete("nombres")
-    for r in range(10):
-        for c in range(10):
+    grille.delete("nombres")
+    for r in range(9):
+        for c in range(9):
             ans = tableau[r][c]
             if ans != 0:
                 x = MARGE + r * COTE + COTE / 2
                 y = MARGE + c * COTE + COTE / 2
                 orig = tableau[r][c]
+                couleur = "gray" if ans == orig else "green"
+                grille.create_text(x, y, text = ans, tags = "nombres", fill = couleur)
+
+def clique_cel(event):
+    x, y = event.x, event.y
+    r, c = (y - MARGE) / COTE, (x - MARGE) / COTE
+
                 
 
-
+generer_grille(creer_tableau(matDefaut))
 racine.mainloop()
