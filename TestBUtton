@@ -20,7 +20,7 @@ ArrayButton = np.empty((9,9),dtype= object)
 
 for j in range(9):
     for i in range(9):
-        e = tk.Button(frame, text=str(matDefaut[i][j]),command="func",width=10, height=5)
+        e = tk.Button(frame, text=str(matDefaut[i][j]),width=10, height=5,command=lambda x=j,y=i: onButtonClicked(x,y))
         e.grid(row=i, column=j) 
         ArrayButton[j][i] = e
 
@@ -29,9 +29,7 @@ print(ArrayButton)
 
 
 frame.pack()
-def func(event):
-    global focus_r, focus_l
-    focus_r, focus_l = 
+def onButtonClicked(x,y):
     ArrayButton[x][y]['text']= '100'
 
 
