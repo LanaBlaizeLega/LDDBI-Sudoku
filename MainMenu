@@ -76,8 +76,8 @@ aligned_text = f"{createdBy:1}{names[0]}\n{'':10}{names[1]}\n{'':19}{names[2]}"
 MainTitle = CTkLabel(MainRoot, text = "Kudoku Sudoku",text_color=TXTCOL2,font=("Cascadia Code",160))
 Credits = CTkLabel(MainRoot, text = aligned_text,text_color=TXTCOL2,font=("Cascadia Code",14))
 
-img = Image.open('download.png')  
-photo = ImageTk.PhotoImage(img)  # Convert to Tkinter-compatible format
+#img = Image.open('download.png')  
+#photo = ImageTk.PhotoImage(img)  # Convert to Tkinter-compatible format
 
 #endregion
 canvas = tk.Canvas(MainRoot, width = img.size[0], height = img.size[1])
