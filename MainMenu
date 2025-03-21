@@ -80,8 +80,8 @@ Credits = CTkLabel(MainRoot, text = aligned_text,text_color=TXTCOL2,font=("Casca
 #photo = ImageTk.PhotoImage(img)  # Convert to Tkinter-compatible format
 
 #endregion
-canvas = tk.Canvas(MainRoot, width = img.size[0], height = img.size[1])
-canvas.create_image(0, 0, anchor=tk.NW, image=photo)
+#canvas = tk.Canvas(MainRoot, width = img.size[0], height = img.size[1])
+#canvas.create_image(0, 0, anchor=tk.NW, image=photo)
 #canvas.pack()
 MainTitle.pack(side="top", fill= tk.X)
 #Credits.pack(side="bottom")
