@@ -1,0 +1,38 @@
+import tkinter as tk
+import random as random
+import numpy as np
+
+matDefaut = np.array([
+    [3,9,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,4,6,0],
+    [2,0,0,0,0,0,0,0,5],
+    [0,7,0,8,0,4,0,1,0],
+    [0,3,0,0,2,0,0,0,0],
+    [5,0,0,0,6,0,8,0,0],
+    [0,1,0,7,3,0,0,2,0],
+    [9,0,8,0,5,0,0,0,0],
+    [0,0,0,2,0,0,0,0,0]])
+
+root = tk.Tk()
+frame = tk.Frame(root,bg="lightblue", bd=5,width=800, height=450)
+
+ArrayButton = np.empty((9,9),dtype= object)
+
+for j in range(9):
+    for i in range(9):
+        e = tk.Button(frame, text=str(matDefaut[i][j]),command="func",width=10, height=5)
+        e.grid(row=i, column=j) 
+        ArrayButton[j][i] = e
+
+print(ArrayButton)
+
+
+
+frame.pack()
+def func(event):
+    global focus_r, focus_l
+    focus_r, focus_l = 
+    ArrayButton[x][y]['text']= '100'
+
+
+root.mainloop()
