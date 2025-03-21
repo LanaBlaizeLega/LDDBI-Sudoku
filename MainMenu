@@ -1,8 +1,9 @@
 import tkinter as tk
-
+from PIL import Image, ImageTk 
+from customtkinter import *
 #region COLORS_CONSTANT
 
-TXTCOL1 = "#FB8423"
+TXTCOL1 = "#C56135"
 TXTCOL2 = "#ED9B40"
 BGCOL1 = "#93B1A7"
 BGCOL2 = "#7A918D"
@@ -26,7 +27,7 @@ def Reload():
     print("ReloadASudokuMenu")
 
 def PackButtons():
-    button2.pack(pady =10)
+    button2.pack(pady=10)
     button3.pack(pady=10)
     button.pack(pady=10)
 
@@ -38,24 +39,53 @@ def LeaveApp():
 #enregion
 
 
-MainRoot = tk.Tk()
-MainRoot.geometry("1600x900")
-MainRoot.title("SudokuMaster")
 
+MainRoot = CTk()
+#MainRoot.geometry("3840x2160")
+width = MainRoot.winfo_screenwidth()
+height = MainRoot.winfo_screenheight()
+MainRoot.geometry(f"{width}x{height}")
+MainRoot.title("Kudoku Sudoku")
+MainRoot.state('zoomed') 
+#MainRoot.attributes('-fullscreen',True)
+switch_var = StringVar(value="dark")
 
-button = tk.Button(MainRoot, text = "Settings", command = Settings,
-                fg = TXTCOL1, font = "Verdana 20", bg = BGCOL3)
+def switch_event():
+    mode = switch_var.get()
+    set_appearance_mode(mode)
+    print(mode)
+   
+switch_1 = CTkSwitch(master=MainRoot, text="LightMode", command=switch_event,
+                                   variable=switch_var, onvalue="dark", offvalue="light",progress_color=TXTCOL1)
 
-button2 = tk.Button(MainRoot, text = "Play", command = Play,
-                fg = TXTCOL1, font = "Verdana 54", bg = BGCOL2)
+switch_1.pack(side="bottom")
 
-button3 = tk.Button(MainRoot, text = "Reload", command = Reload,
-                fg = TXTCOL1, font = "Verdana 24", bg = BGCOL2)
+button = CTkButton(MainRoot, text = "Settings",
+                corner_radius=32, command = Settings,hover_color=TXTCOL1,fg_color=TXTCOL2)
 
-MainTitle = tk.Label(MainRoot, text = "MainTitle", fg=TXTCOL2, bg=BGCOL1, font = "Verdana 100")
+button2 = CTkButton(MainRoot, text = "Play",corner_radius=32, command = Play,hover_color=TXTCOL1,fg_color=TXTCOL2)
 
+button3 = CTkButton(MainRoot, text = "Reload", 
+                corner_radius=32, command = Reload,hover_color=TXTCOL1,fg_color=TXTCOL2)
+
+createdBy = "Created by :"
+names = ["Abigael Roche", "Lana Blaise", "Félix Plaine-Forgues"]
+
+aligned_text = f"{createdBy:1}{names[0]}\n{'':10}{names[1]}\n{'':19}{names[2]}"
+
+MainTitle = CTkLabel(MainRoot, text = "Kudoku Sudoku",text_color=TXTCOL2,font=("Cascadia Code",160))
+Credits = CTkLabel(MainRoot, text = aligned_text,text_color=TXTCOL2,font=("Cascadia Code",14))
+
+#img = Image.open('download.png')  
+#photo = ImageTk.PhotoImage(img)  # Convert to Tkinter-compatible format
+
+#endregion
+#canvas = tk.Canvas(MainRoot, width = img.size[0], height = img.size[1])
+#canvas.create_image(0, 0, anchor=tk.NW, image=photo)
+#canvas.pack()
 MainTitle.pack(side="top", fill= tk.X)
-
+#Credits.pack(side="bottom")
+Credits.place(rely=1.0, relx=1.0, x=0, y=0, anchor=SE)
 
 PackButtons()
 MainRoot.mainloop()
