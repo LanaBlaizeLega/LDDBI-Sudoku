@@ -32,3 +32,5 @@ frame.pack()
 def onButtonClicked(x,y):
     global CurrentBtn
     CurrentBtn = ArrayButton[x][y]
+    print(CurrentBtn)
+root.mainloop()
