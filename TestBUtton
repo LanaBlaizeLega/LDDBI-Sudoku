@@ -2,6 +2,9 @@ import tkinter as tk
 import random as random
 import numpy as np
 
+CurrentBtn = None
+theme = 'light gray'
+
 matDefaut = np.array([
     [3,9,0,0,0,0,0,0,0],
     [0,0,0,0,0,0,4,6,0],
@@ -20,7 +23,7 @@ ArrayButton = np.empty((9,9),dtype= object)
 
 for j in range(9):
     for i in range(9):
-        e = tk.Button(frame, text=str(matDefaut[i][j]),width=10, height=5,command=lambda x=j,y=i: onButtonClicked(x,y))
+        e = tk.Button(frame, bg = theme, text=str(matDefaut[i][j]),width=10, height=5,command=lambda x=j,y=i: onButtonClicked(x,y))
         e.grid(row=i, column=j) 
         ArrayButton[j][i] = e
 
@@ -31,6 +34,16 @@ print(ArrayButton)
 frame.pack()
 def onButtonClicked(x,y):
     global CurrentBtn
-    CurrentBtn = ArrayButton[x][y]
+    if CurrentBtn == ArrayButton[x][y]:
+        CurrentBtn.config(bg = 'light gray')
+        CurrentBtn = None
+    elif CurrentBtn != ArrayButton[x][y] and CurrentBtn != None:
+        CurrentBtn.config(bg = 'light gray')
+        CurrentBtn = ArrayButton[x][y]
+        CurrentBtn.config(bg = 'gray')
+    else:
+        CurrentBtn = ArrayButton[x][y]
+        CurrentBtn.config(bg = 'gray')
     print(CurrentBtn)
+
 root.mainloop()
