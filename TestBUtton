@@ -5,25 +5,26 @@ import numpy as np
 
 def onButtonClicked(x,y):
     global CurrentBtn, i_x, i_y
-    if CurrentBtn == ArrayButton[x][y]:
-        CurrentBtn.config(bg = 'light gray')
-        CurrentBtn = None
-    elif CurrentBtn != ArrayButton[x][y] and CurrentBtn != None:
-        CurrentBtn.config(bg = 'light gray')
-        CurrentBtn = ArrayButton[x][y]
-        CurrentBtn.config(bg = 'gray')
-        i_x, i_y = x,y
-    else:
-        CurrentBtn = ArrayButton[x][y]
-        CurrentBtn.config(bg = 'gray')
-        i_x, i_y = x,y
+    if Array_Origin[x][y] == 0:
+        if CurrentBtn == ArrayButton[x][y]:
+            CurrentBtn.config(bg = 'light gray')
+            CurrentBtn = None
+        elif CurrentBtn != ArrayButton[x][y] and CurrentBtn != None:
+            CurrentBtn.config(bg = 'light gray')
+            CurrentBtn = ArrayButton[x][y]
+            CurrentBtn.config(bg = 'gray')
+            i_x, i_y = x,y
+        else:
+            CurrentBtn = ArrayButton[x][y]
+            CurrentBtn.config(bg = 'gray')
+            i_x, i_y = x,y
     print(CurrentBtn)
 
 def ChangeCellNum(event):
-    #if CurrentBtn != None and event.char in "0123456789" and Array_Origin[i_x][i_y] == 0:
     if CurrentBtn != None and event.char in "0123456789":
         CurrentBtn.config(text = event.char)
         CurrentGrid[i_x][i_y] = event.char
+    print(CurrentGrid)
 
 CurrentBtn = None
 theme = 'light gray'
@@ -49,8 +50,8 @@ ArrayButton = np.empty((9,9),dtype= object)
 
 for j in range(9):
     for i in range(9):
-        e = tk.Button(frame, bg = theme, text=str(CurrentGrid[i][j]),width=10, height=5,command=lambda x=j,y=i: onButtonClicked(x,y))
-        e.grid(row=i, column=j) 
+        e = tk.Button(frame, bg = theme, text=str(CurrentGrid[j][i]),width=10, height=5,command=lambda x=j,y=i: onButtonClicked(x,y))
+        e.grid(row=j, column=i) 
         ArrayButton[j][i] = e
 
 
