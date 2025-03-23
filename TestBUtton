@@ -1,11 +1,34 @@
 import tkinter as tk
 import random as random
 import numpy as np
+#Fonctions
+
+def onButtonClicked(x,y):
+    global CurrentBtn, i_x, i_y
+    if CurrentBtn == ArrayButton[x][y]:
+        CurrentBtn.config(bg = 'light gray')
+        CurrentBtn = None
+    elif CurrentBtn != ArrayButton[x][y] and CurrentBtn != None:
+        CurrentBtn.config(bg = 'light gray')
+        CurrentBtn = ArrayButton[x][y]
+        CurrentBtn.config(bg = 'gray')
+        i_x, i_y = x,y
+    else:
+        CurrentBtn = ArrayButton[x][y]
+        CurrentBtn.config(bg = 'gray')
+        i_x, i_y = x,y
+    print(CurrentBtn)
+
+def ChangeCellNum(event):
+    #if CurrentBtn != None and event.char in "0123456789" and Array_Origin[i_x][i_y] == 0:
+    if CurrentBtn != None and event.char in "0123456789":
+        CurrentBtn.config(text = event.char)
+        CurrentGrid[i_x][i_y] = event.char
 
 CurrentBtn = None
 theme = 'light gray'
 
-matDefaut = np.array([
+Array_Origin = np.array([
     [3,9,0,0,0,0,0,0,0],
     [0,0,0,0,0,0,4,6,0],
     [2,0,0,0,0,0,0,0,5],
@@ -16,34 +39,24 @@ matDefaut = np.array([
     [9,0,8,0,5,0,0,0,0],
     [0,0,0,2,0,0,0,0,0]])
 
+CurrentGrid = Array_Origin.copy()
+
 root = tk.Tk()
+root.bind('<Key>',ChangeCellNum)
 frame = tk.Frame(root,bg="lightblue", bd=5,width=800, height=450)
 
 ArrayButton = np.empty((9,9),dtype= object)
 
 for j in range(9):
     for i in range(9):
-        e = tk.Button(frame, bg = theme, text=str(matDefaut[i][j]),width=10, height=5,command=lambda x=j,y=i: onButtonClicked(x,y))
+        e = tk.Button(frame, bg = theme, text=str(CurrentGrid[i][j]),width=10, height=5,command=lambda x=j,y=i: onButtonClicked(x,y))
         e.grid(row=i, column=j) 
         ArrayButton[j][i] = e
-
-print(ArrayButton)
 
 
 
 frame.pack()
-def onButtonClicked(x,y):
-    global CurrentBtn
-    if CurrentBtn == ArrayButton[x][y]:
-        CurrentBtn.config(bg = 'light gray')
-        CurrentBtn = None
-    elif CurrentBtn != ArrayButton[x][y] and CurrentBtn != None:
-        CurrentBtn.config(bg = 'light gray')
-        CurrentBtn = ArrayButton[x][y]
-        CurrentBtn.config(bg = 'gray')
-    else:
-        CurrentBtn = ArrayButton[x][y]
-        CurrentBtn.config(bg = 'gray')
-    print(CurrentBtn)
+
+
 
 root.mainloop()
