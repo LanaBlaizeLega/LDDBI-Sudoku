@@ -1,8 +1,9 @@
 import tkinter as tk
 from PIL import Image, ImageTk 
 from customtkinter import *
+import numpy as np
 
-#region CONSTANT
+#region CONSTANT & VARIABLES
 
 TXTCOL1 = "#C56135"
 TXTCOL2 = "#ED9B40"
@@ -13,17 +14,41 @@ BGCOL3 = "#9AC1A2"
 MAINTYPO = "Cascadia Code"
 TYPOBIS = "Ink Free"
 
-createdBy = "Created by :"
+created_by = "Created by :"
 names = ["Abigael Roche", "Lana Blaise", "Félix Plaine-Forgues"]
-aligned_text = f"{createdBy:1}{names[0]}\n{'':14}{names[1]}\n{'':26}{names[2]}"
+aligned_text = f"{created_by:1}{names[0]}\n{'':14}{names[1]}\n{'':26}{names[2]}"
+difficulty_strings = ["mathematicaly impossible","so... you Do want to be alone","Still want to have fun eh","Dont need much time to do this one"]
+difficulty_name = ["Impossible","Master","Normal","Easy"]
+SelectedDifficulty = 3
+timer = 0  # minutes écoulée  
 
-#endregion
-#region VARIABLES
+grille_joueur = np.zeros((9, 9))  
+grille_base = np.zeros((9, 9)) 
+grille_solution = np.zeros((9, 9))  
 
-light_switch_var = StringVar(value="dark")
+displayGrid = np.zeros((9, 9), dtype=int)
+
+
 
 #endregion
 #region MENU_FONCTION
+def LoadProgress(fichier):
+    data = np.load(fichier)
+    timer = data['timer'].item()  # Convertir en int
+    grille_joueur = data['joueur']
+    grille_base = data['base']
+    grille_solution = data['solution']
+    
+    return timer, grille_joueur, grille_base, grille_solution
+
+def SaveProgress(fichier, timer, grille_joueur, grille_base, grille_solution):
+    np.savez(fichier, timer=timer, joueur=grille_joueur, base=grille_base, solution=grille_solution)
+    
+def UpdateDisplayGrid():
+    indices_zeros = np.argwhere(displayGrid == 0)
+    index = indices_zeros[np.random.choice(len(indices_zeros))]
+    displayGrid[tuple(index)] = 1
+
 
 def Play():
     print("ChoosingDifficultyMenu")
@@ -40,6 +65,17 @@ def SwitchLightMode():
     set_appearance_mode(mode)
     print(mode)
 
+def UpdateDifficulty(difficulty_level):
+    if difficulty_level >= 65:
+        SelectedDifficulty = 3
+    elif difficulty_level >= 49:
+        SelectedDifficulty = 2
+    elif difficulty_level >= 33:
+        SelectedDifficulty = 1
+    elif difficulty_level >= 17:
+        SelectedDifficulty = 0
+
+    DifficultyPanel['text'] = difficulty_name[SelectedDifficulty] + " - " + difficulty_strings[SelectedDifficulty] 
 #enregion
 #region WIDGET_DEFINITION
 
@@ -51,25 +87,31 @@ MainRoot.geometry(f"{width}x{height}")
 MainRoot.title("Kudoku Sudoku")
 MainRoot.state('zoomed') 
 
-MainTitle = CTkLabel(MainRoot, text = "Kudoku Sudoku",text_color=TXTCOL2,font=(MAINTYPO,160))
-Credits = CTkLabel(MainRoot, text = aligned_text,text_color=TXTCOL2,font=(TYPOBIS,14))
+MainTitle = CTkLabel(MainRoot, text = "Kudoku Sudoku",text_color=TXTCOL2,font=(MAINTYPO,height/5))
+DifficultyPanel = CTkLabel(MainRoot, text = difficulty_name[SelectedDifficulty] + "- " + difficulty_strings[SelectedDifficulty] ,text_color=TXTCOL2,font=(MAINTYPO,height/40))
+   
+Credits = CTkLabel(MainRoot, text = aligned_text,text_color=TXTCOL2,font=(TYPOBIS,height/40))
 
-button2 = CTkButton(MainRoot, text = "Play",corner_radius=32, command = Play,hover_color=TXTCOL1,fg_color=TXTCOL2,font=(TYPOBIS,14))
-button3 = CTkButton(MainRoot, text = "Reload",corner_radius=32, command = Reload,hover_color=TXTCOL1,fg_color=TXTCOL2,font=(TYPOBIS,14))
+PlayButton = CTkButton(MainRoot, text = "Play",corner_radius=32, command = Play,hover_color=TXTCOL1,fg_color=TXTCOL2,font=(TYPOBIS,height/15))
+ReloadButton = CTkButton(MainRoot, text = "Reload",corner_radius=32, command = Reload,hover_color=TXTCOL1,fg_color=TXTCOL2,font=(TYPOBIS,height/15))
 
+light_switch_var = StringVar(value="dark")
 LightSwitch = CTkSwitch(master=MainRoot, text="LightMode", command=SwitchLightMode,variable=light_switch_var, onvalue="dark", offvalue="light",progress_color=TXTCOL1)
 
+DifficultySlider = CTkSlider(MainRoot, from_=0, to=81,command=UpdateDifficulty,number_of_steps=81,orientation='vertical',progress_color=TXTCOL2)
 #region PLACEMENTS
 
 #Panels
 MainTitle.pack(side="top", fill= tk.X)
 Credits.place(rely=0.95, relx=0, x=0, y=0, anchor=SW)
-#Button
-button2.pack(pady=10)
-button3.pack(pady=10)
-#Switch
+
+#Buttons
+PlayButton.pack(pady=10)
+ReloadButton.pack(pady=10)
+#Switchs
 LightSwitch.pack(side="bottom")
-
-#endregion
-
+#Sliders
+DifficultySlider.pack(side="right")
+DifficultyPanel.pack(side="right")
 MainRoot.mainloop()
+

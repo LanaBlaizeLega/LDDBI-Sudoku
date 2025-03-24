@@ -1,33 +1,16 @@
 import tkinter as tk
 import random as random
 import numpy as np
-#Fonctions
+from customtkinter import *
 
-def onButtonClicked(x,y):
-    global CurrentBtn, i_x, i_y
-    if Array_Origin[x][y] == 0:
-        if CurrentBtn == ArrayButton[x][y]:
-            CurrentBtn.config(bg = 'light gray')
-            CurrentBtn = None
-        elif CurrentBtn != ArrayButton[x][y] and CurrentBtn != None:
-            CurrentBtn.config(bg = 'light gray')
-            CurrentBtn = ArrayButton[x][y]
-            CurrentBtn.config(bg = 'gray')
-            i_x, i_y = x,y
-        else:
-            CurrentBtn = ArrayButton[x][y]
-            CurrentBtn.config(bg = 'gray')
-            i_x, i_y = x,y
-    print(CurrentBtn)
-
-def ChangeCellNum(event):
-    if CurrentBtn != None and event.char in "0123456789":
-        CurrentBtn.config(text = event.char)
-        CurrentGrid[i_x][i_y] = event.char
-    print(CurrentGrid)
-
-CurrentBtn = None
-theme = 'light gray'
+#region CONSTANTS & VARIABLES
+COLORS = {
+    "text_primary": "#C56135",
+    "text_secondary": "#ED9B40",
+    "bg_primary": "#93B1A7",
+    "bg_secondary": "#7A918D",
+    "bg_tertiary": "#9AC1A2"
+}
 
 Array_Origin = np.array([
     [3,9,0,0,0,0,0,0,0],
@@ -40,24 +23,72 @@ Array_Origin = np.array([
     [9,0,8,0,5,0,0,0,0],
     [0,0,0,2,0,0,0,0,0]])
 
+CurrentBtn = None
 CurrentGrid = Array_Origin.copy()
 
-root = tk.Tk()
+subgrid_frames = [[None] * 3 for _ in range(3)]
+
+ArrayButton = np.empty((9, 9), dtype=object)
+
+#endregion
+#region FONCTIONS
+
+def onButtonClicked(x,y):
+    global CurrentBtn, i_x, i_y
+    if Array_Origin[x][y] == 0:
+        if CurrentBtn == ArrayButton[x][y]:
+            CurrentBtn.configure(fg_color = 'white')
+            CurrentBtn = None
+        elif CurrentBtn != ArrayButton[x][y] and CurrentBtn != None:
+            CurrentBtn.configure(fg_color = 'white')
+            CurrentBtn = ArrayButton[x][y]
+            CurrentBtn.configure(fg_color = COLORS["bg_secondary"])
+            i_x, i_y = x,y
+        else:
+            CurrentBtn = ArrayButton[x][y]
+            CurrentBtn.configure(fg_color = COLORS["bg_secondary"])
+            i_x, i_y = x,y
+    print(CurrentBtn)
+
+def ChangeCellNum(event):
+    if CurrentBtn != None and event.char in "0123456789":
+        CurrentBtn.configure(text = event.char,text_color="blue")
+        CurrentGrid[i_x][i_y] = event.char
+    print(CurrentGrid)
+
+#endregion
+
+root = CTk()
 root.bind('<Key>',ChangeCellNum)
-frame = tk.Frame(root,bg="lightblue", bd=5,width=800, height=450)
+frame = CTkFrame(root, fg_color=COLORS["bg_tertiary"], corner_radius=4,border_width=5,width=800,height=450)
+root.title("Sudoku")
+frame.pack(pady=2,padx=2)
 
-ArrayButton = np.empty((9,9),dtype= object)
+for i in range(3):
+    for j in range(3):
+        subgrid = CTkFrame(frame, fg_color=COLORS["bg_tertiary"], corner_radius=0)
+        subgrid.grid(row=i, column=j, padx=1, pady=1) 
+        subgrid_frames[i][j] = subgrid
 
-for j in range(9):
-    for i in range(9):
-        e = tk.Button(frame, bg = theme, text=str(CurrentGrid[j][i]),width=10, height=5,command=lambda x=j,y=i: onButtonClicked(x,y))
-        e.grid(row=j, column=i) 
-        ArrayButton[j][i] = e
-
-
-
-frame.pack()
-
-
+for i in range(9):
+    for j in range(9):
+        parent_frame = subgrid_frames[i//3][j//3] 
+        
+        e = CTkButton(
+            parent_frame,
+            text=str(Array_Origin[i][j]) if Array_Origin[i][j] != 0 else "",
+            width=50, height=50,
+            font=("Arial", 16),
+            fg_color="white",  
+            text_color="black", 
+            hover_color=COLORS["bg_secondary"], 
+            border_color=COLORS["bg_primary"],
+            border_width=2,
+            command=lambda x=i, y=j: onButtonClicked(x, y)
+        )
+        
+        e.grid(row=i % 3, column=j % 3)
+        ArrayButton[i][j] = e
 
 root.mainloop()
+
