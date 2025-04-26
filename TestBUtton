@@ -30,17 +30,26 @@ subgrid_frames = [[None] * 3 for _ in range(3)]
 
 ArrayButton = np.empty((9, 9), dtype=object)
 
+err_count = 0
 #endregion
 #region FONCTIONS
 
 def onButtonClicked(x,y):
     global CurrentBtn, i_x, i_y
-    if Array_Origin[x][y] == 0:
+    if Array_Origin[x][y] == 0:        
         if CurrentBtn == ArrayButton[x][y]:
-            CurrentBtn.configure(fg_color = 'white')
+            for v in R_rep:
+                if GetBVal(CurrentBtn) == str(v):
+                    CurrentBtn.configure(fg_color = "red")
+                    break
+                CurrentBtn.configure(fg_color = 'white')
             CurrentBtn = None
         elif CurrentBtn != ArrayButton[x][y] and CurrentBtn != None:
-            CurrentBtn.configure(fg_color = 'white')
+            for v in R_rep:
+                if GetBVal(CurrentBtn) == str(v):
+                    CurrentBtn.configure(fg_color = "red")
+                    break
+                CurrentBtn.configure(fg_color = 'white')
             CurrentBtn = ArrayButton[x][y]
             CurrentBtn.configure(fg_color = COLORS["bg_secondary"])
             i_x, i_y = x,y
@@ -55,6 +64,9 @@ def ChangeCellNum(event):
         CurrentBtn.configure(text = event.char,text_color="blue")
         CurrentGrid[i_x][i_y] = event.char
         CheckLogic()
+        print(R_rep)
+        #if GetBVal(CurrentBtn) in R_rep:
+            #CurrentBtn.configure(fg_color = "red")
     print(CurrentGrid)
 
 def CheckLogic():
@@ -67,6 +79,9 @@ def CheckLogic():
     return True
 
 def CheckRow(row):
+    global R_rep, R_err, err_count
+    if err_count == 0:
+        R_err = None
     #creer un array des indices des valeurs != 0
     AU_i = np.argwhere(row)
     print(AU_i)
@@ -76,21 +91,39 @@ def CheckRow(row):
 
     #Creer un NamedTuple contenant les valeurs et le nombres d'occurences. S'il y a des valeurs répétées, les renvoie
     print(AU)
-    A_occ = np.unique_counts(AU)
-    print(A_occ)
-    val, count = A_occ[0], A_occ[1]
+    val, count = np.unique_counts(AU)
     print(val, count)
-    rep = val[count > 1]
-    print(rep)
-
-    if rep:
+    R_rep = val[count > 1]
+    print(R_rep)
+    print(R_rep.size)
+   
+    if R_rep.size > 0:
+        err_count += 1
+        R_err = True
+        print(R_err, R_rep.size)
         for button in ArrayButton[i_x]:
-            for v in rep:
-                b_text = button.cget("text")
-                if b_text == str(v):
-                    button.configure(fg_color = "red")
+             for v in R_rep:
+                 if GetBVal(button) == str(v):
+                    b_text = button.cget("text")
+                    if b_text == str(v):
+                        button.configure(fg_color = "red")
+    elif R_err == True and R_rep.size == 0:
+        print(R_err)
+        for button in ArrayButton[i_x]:
+            button.configure(fg_color = "white")
+        R_err = False
+    print(R_err)
 
+            
+    # for button in ArrayButton[i_x]:
+    #     button.configure(fg_color = "white")
+    
+    if len(val) == 9 and not R_err:
+        return True
 
+def GetBVal(Btn):
+    B_val = Btn.cget("text")
+    return B_val
     
     
 #endregion
