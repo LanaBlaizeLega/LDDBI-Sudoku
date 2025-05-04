@@ -64,9 +64,17 @@ ArrayButton = np.empty((9, 9), dtype=object)
 err_count = 0
 #endregion
 #region FONCTIONS
-def Compare_Truth(i_x, i_y):
-    if GetBVal(CurrentBtn) == str(Array_Sol[i_x][i_y]):
-        CurrentBtn.configure(fg_color = "pale green")
+def Compare_Truth(Btn):
+    global Array_Origin
+    tup = np.where(ArrayButton == Btn)
+    t_x, t_y = tup[0][0], tup[1][0]
+    if GetBVal(Btn) == str(Array_Sol[t_x][t_y]):
+        Btn.configure(fg_color = "pale green")
+        Array_Origin[t_x][t_y] = GetBVal(Btn)
+    elif GetBVal(Btn) != str(Array_Sol[t_x][t_y]) and GetBVal(Btn) != 0:
+        Btn.configure(fg_color = "red")
+        
+    
 
 def init_color():
     pass
@@ -140,23 +148,28 @@ def CheckLogic():
     if StrictCheck:
         if np.array_equal(CurrentGrid,Array_Sol):
             Victory = True
+            print("Victory!")
             return True
 
-    CheckRow(CurrentRow)
-    #CheckCol(CurrentCol)
-    #CheckSquare(CurrentSquare)
+    else:
+        CheckRow(CurrentRow)
+        #CheckCol(CurrentCol)
+        #CheckSquare(CurrentSquare)
 
 def ChangeCellNum(event):
     if CurrentBtn != None and event.char in "123456789":
+        if StrictCheck and CurrentGrid[i_x][i_y] == Array_Sol[i_x][i_y]:
+            return
         CurrentBtn.configure(text = event.char,text_color="blue")
         CurrentGrid[i_x][i_y] = event.char
-        if StrictCheck:
-            if CurrentGrid[i_x][i_y] == Array_Sol[i_x][i_y]:
-                Array_Origin[i_x][i_y] = event.char
-                CurrentBtn.configure(fg_color = "pale green")
-            else:
-                CurrentBtn.configure(fg_color = "red")
+        # if StrictCheck:
+        #     if CurrentGrid[i_x][i_y] == Array_Sol[i_x][i_y]:
+        #         Array_Origin[i_x][i_y] = event.char
+        #         CurrentBtn.configure(fg_color = "pale green")
+        #     else:
+        #         CurrentBtn.configure(fg_color = "red")
         CheckLogic()
+        Compare_Truth(CurrentBtn)
         #if GetBVal(CurrentBtn) in R_rep:
             #CurrentBtn.configure(fg_color = "red")
     print(CurrentGrid)
@@ -247,7 +260,7 @@ for i in range(9):
             text=str(Array_Origin[i][j]) if Array_Origin[i][j] != 0 else "",
             width=50, height=50,
             font=("Arial", 16),
-            fg_color="white",  
+            fg_color="white" if Array_Origin[i][j] == 0 else "pale green",
             text_color="black", 
             hover_color=COLORS["bg_secondary"], 
             border_color=COLORS["bg_primary"],
