@@ -1,8 +1,6 @@
 import numpy as np
 import random as r
 
-listeTot = [1]*9 + [2]*9 + [3]*9 + [4]*9 + [5]*9 + [6]*9 + [7]*9 + [8]*9 + [9]*9
-r.shuffle(listeTot)
 tab = np.zeros((9,9), dtype=int)
 
 
@@ -15,21 +13,12 @@ def GenererCarreAleatoire(x,y):
         for j in range (y,y+3):
             tab[i][j] = liste.pop()
 
-def GenererDiagonaleAleatoire():
+def Initialisation():
     GenererCarreAleatoire(0,0)
     GenererCarreAleatoire(3,3)
     GenererCarreAleatoire(6,6)
 
-def SupprimerDeListeTot():
-    for lin in tab:
-        for elem in lin:
-            if elem != 0 and elem in listeTot:
-                listeTot.remove(elem)
-
-def Initialisation():
-    GenererDiagonaleAleatoire()
-    SupprimerDeListeTot()
-
+Initialisation()
 
 # conditions sudoku --------------------------------------------------------------------------------
 
@@ -73,34 +62,28 @@ def CheckCarre(tab, lin, col):
 def CheckTotal(tab,lin,col):
     return CheckLigne(tab, lin, col) and CheckColonne(tab, lin, col) and CheckCarre(tab, lin, col)
 
-
-# génération de la grille solution (aide de chat gpt) --------------------------------------------------------------------------
+# génération de la grille solution --------------------------------------------------------------------------
 
 def RemplirGrille():
     return Backtrack(0, 0)
 
 def Backtrack(lin, col):
     if lin == 9:
-        return True  
+        return True
 
     next_lin, next_col = (lin, col + 1) if col < 8 else (lin + 1, 0)
 
     if tab[lin][col] != 0:
         return Backtrack(next_lin, next_col)
 
-    for i in range(len(listeTot)):
-        val = listeTot[i]
+    for val in range(1, 10):
         tab[lin][col] = val
         if CheckTotal(tab, lin, col):
-
-            temp = listeTot.pop(i)
             if Backtrack(next_lin, next_col):
                 return True
-            
-            listeTot.insert(i, temp)
-        tab[lin][col] = 0  
+        tab[lin][col] = 0
 
-    return False  
+    return False
 
 def Creationtableau():
     Initialisation()
@@ -131,8 +114,4 @@ print(tab)
 
 
 # algorithme pour vérifier qu'il n'y ait qu'une seule solution -------------------------------------
-
-
-
-
 
