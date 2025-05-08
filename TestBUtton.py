@@ -15,7 +15,7 @@ COLORS = {
 StrictCheck = True
 StrictCheck_init = True
 
-Array_Origin = np.array([
+playerTab = np.array([
     [3,9,0,0,0,0,0,0,0],
     [0,0,0,0,0,0,4,6,0],
     [2,0,0,0,0,0,0,0,5],
@@ -26,7 +26,7 @@ Array_Origin = np.array([
     [9,0,8,0,5,0,0,0,0],
     [0,0,0,2,0,0,0,0,0]])
 
-Array_Sol = np.array([
+answerTab = np.array([
     [3,9,6,4,7,5,2,8,1],
     [1,5,7,3,8,2,4,6,9],
     [2,8,4,9,1,6,7,3,5],
@@ -46,7 +46,7 @@ CurrentBtn = None
 CurrentRow = None
 CurrentCol = None
 CurrentSquare = None
-CurrentGrid = Array_Origin.copy()
+CurrentGrid = playerTab.copy()
 
 # Array_vsplit = np.split(CurrentGrid, 3)
 # Array_Squares = [np.split(v, 3, axis= 1) for v in Array_vsplit]
@@ -65,13 +65,13 @@ err_count = 0
 #endregion
 #region FONCTIONS
 def Compare_Truth(Btn):
-    global Array_Origin
+    global playerTab
     tup = np.where(ArrayButton == Btn)
     t_x, t_y = tup[0][0], tup[1][0]
-    if GetBVal(Btn) == str(Array_Sol[t_x][t_y]):
+    if GetBVal(Btn) == str(answerTab[t_x][t_y]):
         Btn.configure(fg_color = "pale green")
-        Array_Origin[t_x][t_y] = GetBVal(Btn)
-    elif GetBVal(Btn) != str(Array_Sol[t_x][t_y]) and GetBVal(Btn) != 0:
+        playerTab[t_x][t_y] = GetBVal(Btn)
+    elif GetBVal(Btn) != str(answerTab[t_x][t_y]) and GetBVal(Btn) != 0:
         Btn.configure(fg_color = "red")
         
     
@@ -81,7 +81,7 @@ def init_color():
 
 def StrictCheck_init():
     if StrictCheck_init:
-        Array_Truth = Array_Origin.astype(bool)
+        Array_Truth = playerTab.astype(bool)
         ArrayButton = ArrayButton.configure(Array_Truth)
 
 
@@ -95,7 +95,7 @@ def SplitSquares(array):
 def onButtonClicked(x,y):
     global CurrentBtn, i_x, i_y,i_sq
 
-    if Array_Origin[x][y] == 0:
+    if playerTab[x][y] == 0:
         if StrictCheck:
             if CurrentBtn == ArrayButton[x][y]:
                 CurrentBtn.configure(fg_color = 'white')
@@ -146,7 +146,7 @@ def GetBtnPos(i_x, i_y, i_sq):
 
 def CheckLogic():
     if StrictCheck:
-        if np.array_equal(CurrentGrid,Array_Sol):
+        if np.array_equal(CurrentGrid,answerTab):
             Victory = True
             print("Victory!")
             return True
@@ -158,13 +158,13 @@ def CheckLogic():
 
 def ChangeCellNum(event):
     if CurrentBtn != None and event.char in "123456789":
-        if StrictCheck and CurrentGrid[i_x][i_y] == Array_Sol[i_x][i_y]:
+        if StrictCheck and CurrentGrid[i_x][i_y] == answerTab[i_x][i_y]:
             return
         CurrentBtn.configure(text = event.char,text_color="blue")
         CurrentGrid[i_x][i_y] = event.char
         # if StrictCheck:
-        #     if CurrentGrid[i_x][i_y] == Array_Sol[i_x][i_y]:
-        #         Array_Origin[i_x][i_y] = event.char
+        #     if CurrentGrid[i_x][i_y] == answerTab[i_x][i_y]:
+        #         playerTab[i_x][i_y] = event.char
         #         CurrentBtn.configure(fg_color = "pale green")
         #     else:
         #         CurrentBtn.configure(fg_color = "red")
@@ -184,7 +184,7 @@ def ChangeCellNum(event):
 def CheckRow(CurrentRow):
     global R_rep, R_err, err_count
     if StrictCheck:
-        RowSol = Array_Sol[i_x]
+        RowSol = answerTab[i_x]
         if np.array_equal(CurrentRow,RowSol):
             return True
         
@@ -238,37 +238,51 @@ def GetBVal(Btn):
     
     
 #endregion
+def launch_sudoku():
+    global root, frame, subgrid_frames, ArrayButton, CurrentBtn, CurrentRow, CurrentCol, CurrentSquare, CurrentGrid, Array_Squares
 
-root = CTk()
-root.bind('<Key>',ChangeCellNum)
-frame = CTkFrame(root, fg_color=COLORS["bg_tertiary"], corner_radius=4,border_width=5,width=800,height=450)
-root.title("Sudoku")
-frame.pack(pady=2,padx=2)
+    # (Réinitialise les variables importantes)
+    CurrentBtn = None
+    CurrentRow = None
+    CurrentCol = None
+    CurrentSquare = None
+    CurrentGrid = playerTab.copy()
+    ArrayButton[:] = np.empty((9, 9), dtype=object)
+    subgrid_frames[:] = [[None] * 3 for _ in range(3)]
 
-for i in range(3):
-    for j in range(3):
-        subgrid = CTkFrame(frame, fg_color=COLORS["bg_tertiary"], corner_radius=0)
-        subgrid.grid(row=i, column=j, padx=1, pady=1) 
-        subgrid_frames[i][j] = subgrid
+    root = CTk()
+    root.bind('<Key>', ChangeCellNum)
+    root.title("Sudoku")
 
-for i in range(9):
-    for j in range(9):
-        parent_frame = subgrid_frames[i//3][j//3] 
-        
-        e = CTkButton(
-            parent_frame,
-            text=str(Array_Origin[i][j]) if Array_Origin[i][j] != 0 else "",
-            width=50, height=50,
-            font=("Arial", 16),
-            fg_color="white" if Array_Origin[i][j] == 0 else "pale green",
-            text_color="black", 
-            hover_color=COLORS["bg_secondary"], 
-            border_color=COLORS["bg_primary"],
-            border_width=2,
-            command=lambda x=i, y=j: onButtonClicked(x, y)
-        )
-        
-        e.grid(row=i % 3, column=j % 3)
-        ArrayButton[i][j] = e
-Array_Squares = SplitSquares(CurrentGrid)
-root.mainloop()
+    frame = CTkFrame(root, fg_color=COLORS["bg_tertiary"], corner_radius=4, border_width=5, width=800, height=450)
+    frame.pack(pady=2, padx=2)
+
+    for i in range(3):
+        for j in range(3):
+            subgrid = CTkFrame(frame, fg_color=COLORS["bg_tertiary"], corner_radius=0)
+            subgrid.grid(row=i, column=j, padx=1, pady=1)
+            subgrid_frames[i][j] = subgrid
+
+    for i in range(9):
+        for j in range(9):
+            parent_frame = subgrid_frames[i // 3][j // 3]
+
+            e = CTkButton(
+                parent_frame,
+                text=str(playerTab[i][j]) if playerTab[i][j] != 0 else "",
+                width=50, height=50,
+                font=("Arial", 16),
+                fg_color="white" if playerTab[i][j] == 0 else "pale green",
+                text_color="black",
+                hover_color=COLORS["bg_secondary"],
+                border_color=COLORS["bg_primary"],
+                border_width=2,
+                command=lambda x=i, y=j: onButtonClicked(x, y)
+            )
+
+            e.grid(row=i % 3, column=j % 3)
+            ArrayButton[i][j] = e
+
+    Array_Squares = SplitSquares(CurrentGrid)
+    root.mainloop()
+

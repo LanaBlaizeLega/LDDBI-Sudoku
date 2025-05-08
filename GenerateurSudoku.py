@@ -107,7 +107,8 @@ def ViderCases(num):
     for k in range(num):
         i, j = indices[k]
         tab[i][j] = 0
-                    
+
+       
 ViderCases(50)
 
 print(tab)
