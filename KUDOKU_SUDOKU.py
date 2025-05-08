@@ -3,6 +3,7 @@ from tkinter import StringVar
 from customtkinter import *
 import numpy as np
 import random as r
+import os
 
 # === Constants ===
 COLORS = {
@@ -34,6 +35,7 @@ visible_mask = np.full((9, 9), False)  # Initial mask where False = empty (dark)
 generationTab = np.zeros((9,9), dtype=int)
 playerTab = np.zeros((9,9), dtype=int)
 answerTab = np.zeros((9,9), dtype=int)
+baseTab = np.zeros((9,9), dtype=int)
 DifficultySliderValue = 40
 
 StrictCheck = True
@@ -47,9 +49,9 @@ CurrentGrid = playerTab.copy()
 subgrid_frames = [[None] * 3 for _ in range(3)]
 ArrayButton = np.empty((9, 9), dtype=object)
 err_count = 0
-lives = 5
+lives = 3
 
-timer = 0
+seconds = 0
 running = False
 timer_id = None  
 
@@ -165,7 +167,7 @@ def ViderCases(nb_cases_a_enlever, essais_max=500):
     nb_supprimees = 0
     essais = 0
     tab = answerTab.copy()
-    global playerTab
+    global playerTab, baseTab
     while nb_supprimees < nb_cases_a_enlever and essais < essais_max:
         i, j = r.choice(indices)
         if tab[i][j] == 0:
@@ -183,6 +185,7 @@ def ViderCases(nb_cases_a_enlever, essais_max=500):
 
         essais += 1
     playerTab = tab.copy()
+    baseTab = tab.copy()
 
 # === InGameFunc ===
 
@@ -491,20 +494,22 @@ def update_grid_display():
 
 def GameMenuBackButton():
     show_menu(MainMenu)
-    global generationTab, playerTab, answerTab
+    global generationTab, playerTab, answerTab, baseTab
     for widget in gameGridFrame.winfo_children():
         widget.destroy()
     gameGridFrame.destroy()
     generationTab = np.zeros((9,9), dtype=int)
     playerTab = np.zeros((9,9), dtype=int)
     answerTab = np.zeros((9,9), dtype=int)
+    baseTab = np.zeros((9,9), dtype=int)
 
 def generate_game():
+    global lives
+
     Initialisation()
     Creationtableau()
     ViderCases(int(DifficultySliderValue))
-    global lives
-    lives = 5
+    lives = 3
     show_menu(GameMenu)
     launch_sudoku()
     reset_timer()
@@ -524,23 +529,48 @@ def show_menu(menu):
 
 def load_progress(file):
     data = np.load(file)
-    return data['timer'].item(), data['joueur'], data['base'], data['solution']
+    return data['timer'].item(), data['joueur'], data['base'], data['solution'], data['vies']
 
-def save_progress(file, t, joueur, base, solution):
-    np.savez(file, timer=t, joueur=joueur, base=base, solution=solution)
+def LoadSudoku(file):
+    global seconds,playerTab,baseTab,answerTab,lives
+    seconds,playerTab,baseTab,answerTab,lives = load_progress(file)
+
+    show_menu(GameMenu)
+    launch_sudoku()
+    start_timer()
+
+def demander_nom_fichier():
+    filename = filedialog.asksaveasfilename(
+        defaultextension=".npz",
+        filetypes=[("Fichiers NumPy", "*.npz")],
+        title="Enregistrer la progression"
+    )
+    if filename:
+        save_progress(filename,seconds,playerTab,baseTab,answerTab,lives)
+        update_combobox_values()
+
+def save_progress(file, t, joueur, base, solution,vies):
+    np.savez(file, timer=t, joueur=joueur, base=base, solution=solution,vies = vies)
+
+def update_combobox_values():
+    saves = [f for f in os.listdir(script_dir) if f.endswith('.npz')]
+    ListeDeSaves.configure(values=saves)
+    if saves:
+        ListeDeSaves.set(saves[-1])
 
 # === GUI Menus ===
 MainMenu = CTkFrame(app)
 SecondMenu = CTkFrame(app)
 GameMenu = CTkFrame(app)
-Menus = [MainMenu, SecondMenu,GameMenu]
+LoadMenu = CTkFrame(app)
+Menus = [MainMenu, SecondMenu,GameMenu,LoadMenu]
 
 # MainMenu Widgets
 MainTitle = CTkLabel(MainMenu, text="Kudoku Sudoku", font=(FONTS["main"], height // 5), text_color=COLORS["text_secondary"])
 PlayButton = CTkButton(MainMenu, text="Play", command=lambda: show_menu(SecondMenu), corner_radius=32,
                        hover_color=COLORS["text_primary"], fg_color=COLORS["text_secondary"],
                        font=(FONTS["secondary"], height // 15))
-ReloadButton = CTkButton(MainMenu, text="Reload", command=lambda: print("Reload clicked"), corner_radius=32,
+ReloadButton = CTkButton(MainMenu, text="Reload", command=lambda : show_menu(LoadMenu), corner_radius=32,
                          hover_color=COLORS["text_primary"], fg_color=COLORS["text_secondary"],
                          font=(FONTS["secondary"], height // 15))
 light_switch_var = StringVar(value="dark")
@@ -592,13 +622,30 @@ gameMenuLives = CTkLabel(GameMenu,text= "vie(s) restante(s) : " + str(lives) + "
 gameMenuBackButton = CTkButton(GameMenu, text="Back", command=GameMenuBackButton, corner_radius=32,
                        hover_color=COLORS["text_primary"], fg_color=COLORS["text_secondary"],
                        font=(FONTS["secondary"], height // 15))
-
+saveButton = CTkButton(GameMenu, text="save", command=demander_nom_fichier, corner_radius=32,
+                       hover_color=COLORS["text_primary"], fg_color=COLORS["text_secondary"],
+                       font=(FONTS["secondary"], height // 15))
 gameMenuBackButton.pack()
 
 timer_label = CTkLabel(GameMenu, text="Temps: 00:00",font=(FONTS["secondary"], height // 20))
-
+saveButton.pack()
 timer_label.pack()
 gameMenuLives.pack()
+# === LoadMenu ===
+script_dir = os.path.dirname(os.path.abspath(__file__))
+saves = [f for f in os.listdir(script_dir) if f.endswith('.npz')]
+
+ListeDeSaves = CTkComboBox(LoadMenu,values=saves,command=LoadSudoku)
+BackButtonBis = CTkButton(LoadMenu, text="Back", command=lambda: show_menu(MainMenu), corner_radius=32,
+                       hover_color=COLORS["text_primary"], fg_color=COLORS["text_secondary"],
+                       font=(FONTS["secondary"], height // 15))
+#LoadButton = CTkButton(LoadMenu, text="Load", command=lambda : LoadSudoku(), corner_radius=32,
+                       #hover_color=COLORS["text_primary"], fg_color=COLORS["text_secondary"],
+                       #font=(FONTS["secondary"], height // 15))
+
+ListeDeSaves.pack()
+BackButtonBis.pack()
+
 
 # Initial state
 update_difficulty(40)
