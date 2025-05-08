@@ -65,19 +65,17 @@ err_count = 0
 #endregion
 #region FONCTIONS
 def Compare_Truth(Btn):
-    global Array_Origin
+    global Array_Origin, CurrentBtn
     tup = np.where(ArrayButton == Btn)
     t_x, t_y = tup[0][0], tup[1][0]
     if GetBVal(Btn) == str(Array_Sol[t_x][t_y]):
         Btn.configure(fg_color = "pale green")
         Array_Origin[t_x][t_y] = GetBVal(Btn)
+        CurrentBtn = None
     elif GetBVal(Btn) != str(Array_Sol[t_x][t_y]) and GetBVal(Btn) != 0:
         Btn.configure(fg_color = "red")
+        CurrentBtn = None
         
-    
-
-def init_color():
-    pass
 
 def StrictCheck_init():
     if StrictCheck_init:
@@ -101,6 +99,7 @@ def onButtonClicked(x,y):
                 CurrentBtn.configure(fg_color = 'white')
                 CurrentBtn = None
             elif CurrentBtn != ArrayButton[x][y] and CurrentBtn != None:
+                CurrentBtn.configure(fg_color = 'white')
                 CurrentBtn = ArrayButton[x][y]
                 CurrentBtn.configure(fg_color = COLORS["bg_secondary"])
                 i_x, i_y = x,y
@@ -148,7 +147,7 @@ def CheckLogic():
     if StrictCheck:
         if np.array_equal(CurrentGrid,Array_Sol):
             Victory = True
-            print("Victory!")
+            print(f"Victoire! {err_count} erreurs")
             return True
 
     else:
@@ -162,24 +161,13 @@ def ChangeCellNum(event):
             return
         CurrentBtn.configure(text = event.char,text_color="blue")
         CurrentGrid[i_x][i_y] = event.char
-        # if StrictCheck:
-        #     if CurrentGrid[i_x][i_y] == Array_Sol[i_x][i_y]:
-        #         Array_Origin[i_x][i_y] = event.char
-        #         CurrentBtn.configure(fg_color = "pale green")
-        #     else:
-        #         CurrentBtn.configure(fg_color = "red")
         CheckLogic()
         Compare_Truth(CurrentBtn)
-        #if GetBVal(CurrentBtn) in R_rep:
-            #CurrentBtn.configure(fg_color = "red")
+    elif event.char == "0" and CurrentBtn != None:
+        CurrentGrid[i_x][i_y] = event.char
+        CurrentBtn.configure(text = None, fg_color = "white")
     print(CurrentGrid)
 
-# def CheckLogic():
-#     row = CurrentGrid[i_x, :]
-#     col = CurrentGrid[:, i_y]
-#     if not CheckRow(row) or not CheckCol(col):
-#         return False
-#       return True
 
 def CheckRow(CurrentRow):
     global R_rep, R_err, err_count
@@ -192,9 +180,9 @@ def CheckRow(CurrentRow):
         if err_count == 0:
             R_err = None
         #creer un array des indices des valeurs != 0
-        AU_i = np.argwhere(row)
+        AU_i = np.argwhere(CurrentRow)
         print(AU_i)
-        AU = np.take(row, AU_i)
+        AU = np.take(CurrentRow, AU_i)
         print(AU)
         AU = AU.flatten()
 
@@ -244,6 +232,8 @@ root.bind('<Key>',ChangeCellNum)
 frame = CTkFrame(root, fg_color=COLORS["bg_tertiary"], corner_radius=4,border_width=5,width=800,height=450)
 root.title("Sudoku")
 frame.pack(pady=2,padx=2)
+GUI_Bar = CTkFrame(root, fg_color="white", width=450, height=50)
+GUI_Bar.pack(side = BOTTOM)
 
 for i in range(3):
     for j in range(3):
