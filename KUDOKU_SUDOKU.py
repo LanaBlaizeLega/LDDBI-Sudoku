@@ -185,17 +185,18 @@ def ViderCases(nb_cases_a_enlever, essais_max=500):
 # === InGameFunc ===
 
 def Compare_Truth(Btn):
-    global playerTab
+    global playerTab, CurrentBtn
     tup = np.where(ArrayButton == Btn)
     t_x, t_y = tup[0][0], tup[1][0]
     if GetBVal(Btn) == str(answerTab[t_x][t_y]):
         Btn.configure(fg_color = "pale green")
         playerTab[t_x][t_y] = GetBVal(Btn)
+        CurrentBtn = None
     elif GetBVal(Btn) != str(answerTab[t_x][t_y]) and GetBVal(Btn) != 0:
         Btn.configure(fg_color = "red")
+        err_count += 1
+        CurrentBtn = None
         
-def init_color():
-    pass
 
 def StrictCheck_init():
     if StrictCheck_init:
@@ -219,8 +220,7 @@ def onButtonClicked(x,y):
                 CurrentBtn.configure(fg_color = 'white')
                 CurrentBtn = None
             elif CurrentBtn != ArrayButton[x][y] and CurrentBtn != None:
-                #if CurrentBtn.cget("fg_color") != 'pale green' or 'red':
-                    #CurrentBtn.configure(fg_color = 'white')
+                CurrentBtn.configure(fg_color = 'white')
                 CurrentBtn = ArrayButton[x][y]
                 CurrentBtn.configure(fg_color = COLORS["bg_secondary"])
                 i_x, i_y = x,y
@@ -281,6 +281,9 @@ def ChangeCellNum(event):
         CurrentGrid[i_x][i_y] = event.char
         CheckLogic()
         Compare_Truth(CurrentBtn)
+    elif event.char == "0" and CurrentBtn != None:
+        CurrentGrid[i_x][i_y] = event.char
+        CurrentBtn.configure(text = None, fg_color = "white")
     print(CurrentGrid)
 
 def CheckRow(CurrentRow):
