@@ -616,21 +616,25 @@ NumberOfDigitPanel.grid(row=4, column=3)
 grid_frame.grid(row=3, column=6, rowspan=5, columnspan=5)
 
 # GameMenu Widgets
-
+BtnFrame = CTkFrame(GameMenu)
 gameGridFrame = CTkFrame(GameMenu)
 gameMenuLives = CTkLabel(GameMenu,text= "vie(s) restante(s) : " + str(lives) + "/3")
-gameMenuBackButton = CTkButton(GameMenu, text="Back", command=GameMenuBackButton, corner_radius=32,
+gameMenuBackButton = CTkButton(BtnFrame, text="Back", command=GameMenuBackButton, corner_radius=32,
                        hover_color=COLORS["text_primary"], fg_color=COLORS["text_secondary"],
                        font=(FONTS["secondary"], height // 15))
-saveButton = CTkButton(GameMenu, text="save", command=demander_nom_fichier, corner_radius=32,
+saveButton = CTkButton(BtnFrame, text="save", command=demander_nom_fichier, corner_radius=32,
                        hover_color=COLORS["text_primary"], fg_color=COLORS["text_secondary"],
                        font=(FONTS["secondary"], height // 15))
-gameMenuBackButton.pack()
+
 
 timer_label = CTkLabel(GameMenu, text="Temps: 00:00",font=(FONTS["secondary"], height // 20))
-saveButton.pack()
-timer_label.pack()
-gameMenuLives.pack()
+
+
+timer_label.pack(pady = 10)
+gameMenuLives.pack(pady = 10)
+BtnFrame.pack(side=BOTTOM,pady = 20)
+saveButton.pack(side=LEFT,padx = 10)
+gameMenuBackButton.pack(side=RIGHT,padx = 10)
 # === LoadMenu ===
 script_dir = os.path.dirname(os.path.abspath(__file__))
 saves = [f for f in os.listdir(script_dir) if f.endswith('.npz')]
@@ -639,12 +643,9 @@ ListeDeSaves = CTkComboBox(LoadMenu,values=saves,command=LoadSudoku)
 BackButtonBis = CTkButton(LoadMenu, text="Back", command=lambda: show_menu(MainMenu), corner_radius=32,
                        hover_color=COLORS["text_primary"], fg_color=COLORS["text_secondary"],
                        font=(FONTS["secondary"], height // 15))
-#LoadButton = CTkButton(LoadMenu, text="Load", command=lambda : LoadSudoku(), corner_radius=32,
-                       #hover_color=COLORS["text_primary"], fg_color=COLORS["text_secondary"],
-                       #font=(FONTS["secondary"], height // 15))
 
-ListeDeSaves.pack()
-BackButtonBis.pack()
+ListeDeSaves.pack(side = LEFT,expand=True)
+BackButtonBis.pack(side = LEFT,expand=True)
 
 
 # Initial state
