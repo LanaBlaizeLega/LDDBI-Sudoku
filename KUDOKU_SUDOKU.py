@@ -113,6 +113,9 @@ def RemplirGrille():
     return Backtrack(0, 0)
 
 def Backtrack(lin, col):
+    liste = [1,2,3,4,5,6,7,8,9]
+    r.shuffle(liste)
+
     if lin == 9:
         return True
 
@@ -121,14 +124,17 @@ def Backtrack(lin, col):
     if generationTab[lin][col] != 0:
         return Backtrack(next_lin, next_col)
 
-    for val in range(1, 10):
+    for val in liste:
         generationTab[lin][col] = val
         if CheckTotal(generationTab, lin, col):
+            r.shuffle(liste)
             if Backtrack(next_lin, next_col):
                 return True
         generationTab[lin][col] = 0
 
     return False
+
+
 
 def Creationtableau():
     global answerTab
@@ -558,6 +564,26 @@ def update_combobox_values():
     if saves:
         ListeDeSaves.set(saves[-1])
 
+def generate_prefab_sudoku(name="prefab_sudoku.npz", holes=40):
+    global playerTab,baseTab,answerTab,generationTab
+
+    generationTab = np.zeros((9,9), dtype=int)
+    playerTab = np.zeros((9,9), dtype=int)
+    answerTab = np.zeros((9,9), dtype=int)
+    baseTab = np.zeros((9,9), dtype=int)
+
+    Initialisation()
+    Creationtableau()
+    ViderCases(holes)
+    
+    filename = os.path.join(script_dir, name)
+    save_progress(filename, 0, playerTab, baseTab, answerTab,3)
+    update_combobox_values()  # Pour l'afficher dans la liste
+
+def PrefabMaking():
+    for i in range(20,60,5):
+        generate_prefab_sudoku(str(i) + "trous",i)
+        
 # === GUI Menus ===
 MainMenu = CTkFrame(app)
 SecondMenu = CTkFrame(app)
@@ -566,6 +592,7 @@ LoadMenu = CTkFrame(app)
 Menus = [MainMenu, SecondMenu,GameMenu,LoadMenu]
 
 # MainMenu Widgets
+PrefabBTN = CTkButton(MainMenu,text="prefab",command=PrefabMaking)
 MainTitle = CTkLabel(MainMenu, text="Kudoku Sudoku", font=(FONTS["main"], height // 5), text_color=COLORS["text_secondary"])
 PlayButton = CTkButton(MainMenu, text="Play", command=lambda: show_menu(SecondMenu), corner_radius=32,
                        hover_color=COLORS["text_primary"], fg_color=COLORS["text_secondary"],
