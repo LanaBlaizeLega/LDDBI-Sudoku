@@ -74,6 +74,7 @@ def Compare_Truth(Btn):
         CurrentBtn = None
     elif GetBVal(Btn) != str(Array_Sol[t_x][t_y]) and GetBVal(Btn) != 0:
         Btn.configure(fg_color = "red")
+        err_count += 1
         CurrentBtn = None
         
 
