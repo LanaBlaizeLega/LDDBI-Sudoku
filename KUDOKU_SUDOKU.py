@@ -48,6 +48,9 @@ subgrid_frames = [[None] * 3 for _ in range(3)]
 ArrayButton = np.empty((9, 9), dtype=object)
 err_count = 0
 
+timer = 0
+running = False
+
 # === SudokuGenerationFunc
 
 def GenererCarreAleatoire(x,y):
@@ -371,6 +374,28 @@ def launch_sudoku():
             ArrayButton[i][j] = e
 
     Array_Squares = SplitSquares(CurrentGrid)
+# === timer fonc ===
+def update_timer():
+    global seconds, running
+    if running:
+        print("timer running")
+        seconds += 1
+        minutes = seconds // 60
+        secs = seconds % 60
+        timer_label.configure(text=f"Temps: {minutes:02}:{secs:02}")
+        app.after(1000, update_timer)
+
+def start_timer():
+    global running
+    if not running:
+        running = True
+        update_timer()
+
+def reset_timer():
+    global running, seconds
+    running = False
+    seconds = 0
+    timer_label.configure(text="Temps: 00:00")
 
 # === Tkinter setup ===
 
@@ -442,6 +467,9 @@ def generate_game():
     ViderCases(int(DifficultySliderValue))
     show_menu(GameMenu)
     launch_sudoku()
+    reset_timer()
+    start_timer()
+
     print("Game generated!")
 
 def switch_theme():
@@ -520,11 +548,16 @@ grid_frame.grid(row=3, column=6, rowspan=5, columnspan=5)
 # GameMenu Widgets
 
 gameGridFrame = CTkFrame(GameMenu)
+
 gameMenuBackButton = CTkButton(GameMenu, text="Back", command=GameMenuBackButton, corner_radius=32,
                        hover_color=COLORS["text_primary"], fg_color=COLORS["text_secondary"],
                        font=(FONTS["secondary"], height // 15))
 
 gameMenuBackButton.pack()
+
+timer_label = CTkLabel(GameMenu, text="Temps: 00:00",font=(FONTS["secondary"], height // 20))
+
+timer_label.pack()
 
 # Initial state
 update_difficulty(40)
