@@ -47,6 +47,7 @@ CurrentGrid = playerTab.copy()
 subgrid_frames = [[None] * 3 for _ in range(3)]
 ArrayButton = np.empty((9, 9), dtype=object)
 err_count = 0
+lives = 5
 
 timer = 0
 running = False
@@ -185,18 +186,36 @@ def ViderCases(nb_cases_a_enlever, essais_max=500):
 # === InGameFunc ===
 
 def Compare_Truth(Btn):
-    global playerTab, CurrentBtn, err_count
+    global playerTab, CurrentBtn, err_count, lives
+    # renvoie un tuple contenant les 2 indices de bouton
     tup = np.where(ArrayButton == Btn)
     t_x, t_y = tup[0][0], tup[1][0]
+    # reponse correcte
     if GetBVal(Btn) == str(answerTab[t_x][t_y]):
         Btn.configure(fg_color = "pale green")
         playerTab[t_x][t_y] = GetBVal(Btn)
         CurrentBtn = None
+    # reponse incorrecte
     elif GetBVal(Btn) != str(answerTab[t_x][t_y]) and GetBVal(Btn) != 0:
         Btn.configure(fg_color = "red")
         err_count += 1
+        lives -= 1
+        print(err_count)
         CurrentBtn = None
-        
+        print(gameGridFrame.winfo_children())
+        print(len(gameGridFrame.winfo_children()))
+        if lives == 0:
+            defeat()
+            
+
+
+def defeat():
+    global running
+    for subgrid in gameGridFrame.winfo_children():
+        for btn in subgrid.winfo_children():
+            btn.configure(state= 'disabled')
+    running = False
+    
 
 def StrictCheck_init():
     if StrictCheck_init:
@@ -342,7 +361,7 @@ def GetBVal(Btn):
 #endregion
 
 def launch_sudoku():
-    global gameGridFrame, subgrid_frames, ArrayButton, CurrentBtn, CurrentRow, CurrentCol, CurrentSquare, CurrentGrid, Array_Squares
+    global gameGridFrame, subgrid_frames, ArrayButton, CurrentBtn, CurrentRow, CurrentCol, CurrentSquare, CurrentGrid, Array_Squares, parent_frame
 
     # (Réinitialise les variables importantes)
     CurrentBtn = None
