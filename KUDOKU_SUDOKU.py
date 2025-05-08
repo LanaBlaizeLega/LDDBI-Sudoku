@@ -185,7 +185,7 @@ def ViderCases(nb_cases_a_enlever, essais_max=500):
 # === InGameFunc ===
 
 def Compare_Truth(Btn):
-    global playerTab, CurrentBtn
+    global playerTab, CurrentBtn, err_count
     tup = np.where(ArrayButton == Btn)
     t_x, t_y = tup[0][0], tup[1][0]
     if GetBVal(Btn) == str(answerTab[t_x][t_y]):
@@ -220,7 +220,12 @@ def onButtonClicked(x,y):
                 CurrentBtn.configure(fg_color = 'white')
                 CurrentBtn = None
             elif CurrentBtn != ArrayButton[x][y] and CurrentBtn != None:
-                CurrentBtn.configure(fg_color = 'white')
+                print(GetBVal(CurrentBtn))
+                print(answerTab)
+                if GetBVal(CurrentBtn) == '' or GetBVal(CurrentBtn) == None:
+                    CurrentBtn.configure(fg_color = 'white')
+                elif GetBVal(CurrentBtn) != str(answerTab[x][y]):
+                    CurrentBtn.configure(fg_color = "red")
                 CurrentBtn = ArrayButton[x][y]
                 CurrentBtn.configure(fg_color = COLORS["bg_secondary"])
                 i_x, i_y = x,y
