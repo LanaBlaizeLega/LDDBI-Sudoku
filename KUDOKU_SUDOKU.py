@@ -404,7 +404,10 @@ app.bind('<Key>', ChangeCellNum)
 width, height = app.winfo_screenwidth(), app.winfo_screenheight()
 app.geometry(f"{width}x{height}")
 app.title("Kudoku Sudoku")
-app.state('zoomed')
+try:
+    app.state('zoomed')
+except tk.TclError:
+    app.wm_attributes("-zoomed", True)
 
 def precompute_empty_cells():
     # Create a list of all indices (i, j) for the grid
