@@ -51,6 +51,7 @@ lives = 5
 
 timer = 0
 running = False
+timer_id = None  
 
 # === SudokuGenerationFunc
 
@@ -200,6 +201,7 @@ def Compare_Truth(Btn):
         Btn.configure(fg_color = "red")
         err_count += 1
         lives -= 1
+        gameMenuLives.configure(text= "vie(s) restante(s) : " + str(lives) + "/3")
         print(err_count)
         CurrentBtn = None
         print(gameGridFrame.winfo_children())
@@ -403,24 +405,30 @@ def launch_sudoku():
     Array_Squares = SplitSquares(CurrentGrid)
 # === timer fonc ===
 def update_timer():
-    global seconds, running
-    if running:
-        print("timer running")
-        seconds += 1
-        minutes = seconds // 60
-        secs = seconds % 60
-        timer_label.configure(text=f"Temps: {minutes:02}:{secs:02}")
-        app.after(1000, update_timer)
+    global seconds, timer_id
+    seconds += 1
+    minutes = seconds // 60
+    secs = seconds % 60
+    timer_label.configure(text=f"Temps: {minutes:02}:{secs:02}")
+    timer_id = app.after(1000, update_timer)
 
 def start_timer():
-    global running
-    if not running:
-        running = True
-        update_timer()
+    global running, timer_id
+    if running:
+        stop_timer()  
+    running = True
+    update_timer()
+
+def stop_timer():
+    global running, timer_id
+    running = False
+    if timer_id is not None:
+        app.after_cancel(timer_id)
+        timer_id = None
 
 def reset_timer():
-    global running, seconds
-    running = False
+    global seconds
+    stop_timer()
     seconds = 0
     timer_label.configure(text="Temps: 00:00")
 
@@ -437,9 +445,9 @@ except tk.TclError:
     app.wm_attributes("-zoomed", True)
 
 def precompute_empty_cells():
-    # Create a list of all indices (i, j) for the grid
+    
     indices = [(i, j) for i in range(9) for j in range(9)]
-    # Shuffle the indices to make the empty cells random, but fixed once calculated
+    
     r.shuffle(indices)
     return indices
 
@@ -495,6 +503,8 @@ def generate_game():
     Initialisation()
     Creationtableau()
     ViderCases(int(DifficultySliderValue))
+    global lives
+    lives = 5
     show_menu(GameMenu)
     launch_sudoku()
     reset_timer()
@@ -578,7 +588,7 @@ grid_frame.grid(row=3, column=6, rowspan=5, columnspan=5)
 # GameMenu Widgets
 
 gameGridFrame = CTkFrame(GameMenu)
-
+gameMenuLives = CTkLabel(GameMenu,text= "vie(s) restante(s) : " + str(lives) + "/3")
 gameMenuBackButton = CTkButton(GameMenu, text="Back", command=GameMenuBackButton, corner_radius=32,
                        hover_color=COLORS["text_primary"], fg_color=COLORS["text_secondary"],
                        font=(FONTS["secondary"], height // 15))
@@ -588,6 +598,7 @@ gameMenuBackButton.pack()
 timer_label = CTkLabel(GameMenu, text="Temps: 00:00",font=(FONTS["secondary"], height // 20))
 
 timer_label.pack()
+gameMenuLives.pack()
 
 # Initial state
 update_difficulty(40)
