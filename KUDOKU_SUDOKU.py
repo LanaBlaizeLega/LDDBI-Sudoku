@@ -13,7 +13,6 @@ COLORS = {
     "bg_secondary": "#7A918D",
     "bg_tertiary": "#9AC1A2"
 }
-
 FONTS = {
     "main": "Segoe UI",
     "secondary": "Arial"
@@ -26,7 +25,6 @@ DIFFICULTY_DESCRIPTIONS = [
     "Still want to have fun eh",
     "Dont need much time to do this one"
 ]
-
 
 # === Globals ===
 grid_labels = []
@@ -114,7 +112,6 @@ def RemplirGrille():
 
 def Backtrack(lin, col):
     liste = [1,2,3,4,5,6,7,8,9]
-    r.shuffle(liste)
 
     if lin == 9:
         return True
@@ -127,7 +124,6 @@ def Backtrack(lin, col):
     for val in liste:
         generationTab[lin][col] = val
         if CheckTotal(generationTab, lin, col):
-            r.shuffle(liste)
             if Backtrack(next_lin, next_col):
                 return True
         generationTab[lin][col] = 0
@@ -533,6 +529,14 @@ def show_menu(menu):
         m.pack_forget()
     menu.pack(fill="both", expand=True, padx=20, pady=20)
 
+def pause():
+    show_menu(PauseMenu)
+    stop_timer()
+
+def unpause():
+    show_menu(GameMenu)
+    start_timer()
+
 def load_progress(file):
     data = np.load(file)
     return data['timer'].item(), data['joueur'], data['base'], data['solution'], data['vies']
@@ -578,18 +582,30 @@ def generate_prefab_sudoku(name="prefab_sudoku.npz", holes=40):
     
     filename = os.path.join(script_dir, name)
     save_progress(filename, 0, playerTab, baseTab, answerTab,3)
-    update_combobox_values()  # Pour l'afficher dans la liste
+    update_combobox_values()  
 
 def PrefabMaking():
-    for i in range(20,60,5):
-        generate_prefab_sudoku(str(i) + "trous",i)
-        
+    thresholds = [65, 49, 33, 17]
+    
+    for i in range(20, 55, 5):
+        for n, threshold in enumerate(thresholds):
+            if i >= threshold:
+                difficulty = n
+                break
+        else:
+            # Si aucun seuil n'est respecté (donc i > tous les seuils)
+            difficulty = len(thresholds)
+
+        generate_prefab_sudoku(f"{DIFFICULTY_LABELS[difficulty]} {i} trous", i)
+
 # === GUI Menus ===
 MainMenu = CTkFrame(app)
 SecondMenu = CTkFrame(app)
 GameMenu = CTkFrame(app)
 LoadMenu = CTkFrame(app)
-Menus = [MainMenu, SecondMenu,GameMenu,LoadMenu]
+PauseMenu = CTkFrame(app)
+LossMenu = CTkFrame(app)
+Menus = [MainMenu, SecondMenu,GameMenu,LoadMenu,PauseMenu,LossMenu]
 
 # MainMenu Widgets
 PrefabBTN = CTkButton(MainMenu,text="prefab",command=PrefabMaking)
@@ -611,7 +627,7 @@ MainTitle.pack(side="top", fill=tk.X)
 PlayButton.pack(pady=10)
 ReloadButton.pack(pady=10)
 LightSwitch.pack(side="bottom")
-
+PrefabBTN.pack()
 # SecondMenu Widgets
 GenerateButton = CTkButton(SecondMenu, text="Generate", command=generate_game, corner_radius=32,
                            hover_color=COLORS["text_primary"], fg_color=COLORS["text_secondary"],
@@ -653,6 +669,9 @@ saveButton = CTkButton(BtnFrame, text="save", command=demander_nom_fichier, corn
                        hover_color=COLORS["text_primary"], fg_color=COLORS["text_secondary"],
                        font=(FONTS["secondary"], height // 15))
 
+pauseButton = CTkButton(BtnFrame, text="pause", command=pause, corner_radius=32,
+                       hover_color=COLORS["text_primary"], fg_color=COLORS["text_secondary"],
+                       font=(FONTS["secondary"], height // 15))
 
 timer_label = CTkLabel(GameMenu, text="Temps: 00:00",font=(FONTS["secondary"], height // 20))
 
@@ -661,7 +680,25 @@ timer_label.pack(pady = 10)
 gameMenuLives.pack(pady = 10)
 BtnFrame.pack(side=BOTTOM,pady = 20)
 saveButton.pack(side=LEFT,padx = 10)
+pauseButton.pack(side=LEFT,padx = 10)
 gameMenuBackButton.pack(side=RIGHT,padx = 10)
+# === PauseMenu ===
+
+UnpauseButton = CTkButton(PauseMenu, text="UN - Pause", command=unpause, corner_radius=32,
+                       hover_color=COLORS["text_primary"], fg_color=COLORS["text_secondary"],
+                       font=(FONTS["secondary"], height // 15))
+
+UnpauseButton.pack(side=LEFT,expand=True)
+# === LossMenu ===
+LossLabel = CTkLabel(LossMenu,text="Perdus !",fg_color=COLORS["text_secondary"],
+                       font=(FONTS["secondary"], height // 10))
+
+BackButton = CTkButton(LossMenu, text="Back", command=lambda: show_menu(MainMenu), corner_radius=32,
+                       hover_color=COLORS["text_primary"], fg_color=COLORS["text_secondary"],
+                       font=(FONTS["secondary"], height // 15))
+LossLabel.pack(expand=True)
+UnpauseButton.pack(expand=True)
+
 # === LoadMenu ===
 script_dir = os.path.dirname(os.path.abspath(__file__))
 saves = [f for f in os.listdir(script_dir) if f.endswith('.npz')]
