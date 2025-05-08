@@ -220,6 +220,7 @@ def defeat():
         for btn in subgrid.winfo_children():
             btn.configure(state= 'disabled')
     running = False
+    show_menu(LossMenu)
     
 
 def SplitSquares(array):
@@ -357,6 +358,19 @@ def CheckRow(CurrentRow):
 def GetBVal(Btn):
     B_val = Btn.cget("text")
     return B_val
+
+def reveal_cell():
+    # attribue la valeur correcte à l'un des cases vides
+    global CurrentGrid, playerTab, ArrayButton, EmptyCells, CurrentRow
+    EmptyCells = np.argwhere(CurrentGrid == 0)
+    r_cell = np.random.randint(low=0, high=EmptyCells.shape[0])
+    r_x, r_y = EmptyCells[r_cell][0], EmptyCells[r_cell][1]
+    CurrentGrid[r_x][r_y] = answerTab[r_x][r_y]
+    playerTab[r_x][r_y] = answerTab[r_x][r_y]
+    ArrayButton[r_x][r_y].configure(text=str(answerTab[r_x][r_y]), fg_color = "pale green")
+    CurrentRow = CurrentGrid[r_x, :]
+    CheckLogic()
+
       
 #endregion
 
@@ -667,7 +681,7 @@ pauseButton = CTkButton(BtnFrame, text="pause", command=pause, corner_radius=32,
                        font=(FONTS["secondary"], height // 15))
 
 timer_label = CTkLabel(GameMenu, text="Temps: 00:00",font=(FONTS["secondary"], height // 20))
-hintButton = CTkButton(GameMenu, text="Aide", fg_color=COLORS["text_secondary"], font=(FONTS["secondary"], height // 20))
+hintButton = CTkButton(GameMenu, text="Aide", fg_color=COLORS["text_secondary"], font=(FONTS["secondary"], height // 20), command=reveal_cell)
 
 
 hintButton.pack(anchor=E)
