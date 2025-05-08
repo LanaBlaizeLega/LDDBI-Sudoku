@@ -209,8 +209,6 @@ def Compare_Truth(Btn):
         gameMenuLives.configure(text= "vie(s) restante(s) : " + str(lives) + "/3")
         print(err_count)
         CurrentBtn = None
-        print(gameGridFrame.winfo_children())
-        print(len(gameGridFrame.winfo_children()))
         if lives == 0:
             defeat()
             
@@ -224,13 +222,8 @@ def defeat():
     running = False
     
 
-def StrictCheck_init():
-    if StrictCheck_init:
-        Array_Truth = playerTab.astype(bool)
-        ArrayButton = ArrayButton.configure(Array_Truth)
-
-
 def SplitSquares(array):
+    # renvoie un carré des carrés 3x3
     Array_vsplit = np.split(array, 3)
     Array_Squares = [np.split(v, 3, axis= 1) for v in Array_vsplit]
     Array_Squares = [col for row in Array_Squares for col in row]
@@ -238,6 +231,7 @@ def SplitSquares(array):
     return Array_Squares
 
 def onButtonClicked(x,y):
+    # change la coloration du case choisi 
     global CurrentBtn, i_x, i_y,i_sq
 
     if playerTab[x][y] == 0:
@@ -246,8 +240,6 @@ def onButtonClicked(x,y):
                 CurrentBtn.configure(fg_color = 'white')
                 CurrentBtn = None
             elif CurrentBtn != ArrayButton[x][y] and CurrentBtn != None:
-                print(GetBVal(CurrentBtn))
-                print(answerTab)
                 if GetBVal(CurrentBtn) == '' or GetBVal(CurrentBtn) == None:
                     CurrentBtn.configure(fg_color = 'white')
                 elif GetBVal(CurrentBtn) != str(answerTab[x][y]):
@@ -305,6 +297,7 @@ def CheckLogic():
         CheckRow(CurrentRow)
 
 def ChangeCellNum(event):
+    # change le chiffre dans le case ou l'efface
     if CurrentBtn != None and event.char in "123456789":
         if StrictCheck and CurrentGrid[i_x][i_y] == answerTab[i_x][i_y]:
             return
@@ -712,6 +705,8 @@ ListeDeSaves.pack(side = LEFT,expand=True)
 BackButtonBis.pack(side = LEFT,expand=True)
 
 
+hintButton = CTkButton(GameMenu, text="Aide", fg_color=COLORS["text_secondary"], font=(FONTS["secondary"], height // 15))
+hintButton.pack()
 # Initial state
 update_difficulty(40)
 show_menu(MainMenu)
