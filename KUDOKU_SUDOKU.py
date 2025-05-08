@@ -1,0 +1,535 @@
+import tkinter as tk
+from tkinter import StringVar
+from customtkinter import *
+import numpy as np
+import random as r
+
+# === Constants ===
+COLORS = {
+    "text_primary": "#C56135",
+    "text_secondary": "#ED9B40", 
+    "bg_primary": "#93B1A7",
+    "bg_secondary": "#7A918D",
+    "bg_tertiary": "#9AC1A2"
+}
+
+FONTS = {
+    "main": "Segoe UI",
+    "secondary": "Arial"
+}
+CREDITS = ["Abigael Roche", "Lana Blaise", "Félix Plaine-Forgues"]
+DIFFICULTY_LABELS = ["Impossible", "Master", "Normal", "Easy"]
+DIFFICULTY_DESCRIPTIONS = [
+    "mathematically impossible",
+    "so... you Do want to be alone",
+    "Still want to have fun eh",
+    "Dont need much time to do this one"
+]
+
+
+# === Globals ===
+grid_labels = []
+precomputed_empty_cells = []
+visible_mask = np.full((9, 9), False)  # Initial mask where False = empty (dark), True = filled (light)
+generationTab = np.zeros((9,9), dtype=int)
+playerTab = np.zeros((9,9), dtype=int)
+answerTab = np.zeros((9,9), dtype=int)
+DifficultySliderValue = 40
+
+StrictCheck = True
+StrictCheck_init = True
+
+CurrentBtn = None
+CurrentRow = None
+CurrentCol = None
+CurrentSquare = None
+CurrentGrid = playerTab.copy()
+subgrid_frames = [[None] * 3 for _ in range(3)]
+ArrayButton = np.empty((9, 9), dtype=object)
+err_count = 0
+
+# === SudokuGenerationFunc
+
+def GenererCarreAleatoire(x,y):
+    liste = [1,2,3,4,5,6,7,8,9]
+    r.shuffle(liste)
+    for i in range (x, x+3):
+        for j in range (y,y+3):
+            generationTab[i][j] = liste.pop()
+
+def Initialisation():
+    GenererCarreAleatoire(0,0)
+    GenererCarreAleatoire(3,3)
+    GenererCarreAleatoire(6,6)
+
+def CheckLigne(generationTab, lin, col):
+    num = generationTab[lin][col]
+    if num == 0:
+        return True
+    for c in range(len(generationTab[lin])):
+        if c != col and generationTab[lin][c] == num:
+            return False
+    return True
+
+def CheckColonne(generationTab, lin, col):
+    num = generationTab[lin][col]
+    if num == 0:
+        return True
+    for l in range(len(generationTab[col])):
+        if l != lin and generationTab[l][col] == num:
+            return False
+    return True
+
+def IndiceCarre(i):
+    if i >= 6:
+        return 6
+    elif i <= 3:
+        return 0
+    else:
+        return 3
+
+def CheckCarre(generationTab, lin, col):
+    carreX = IndiceCarre(lin)
+    carreY = IndiceCarre(col)
+
+    listeCarre = []
+    for i in range (carreX, carreX+3):
+        for j in range (carreY,carreY+3):
+            if generationTab[i][j] != 0:
+                listeCarre.append(generationTab[i][j])
+    return len(listeCarre) == len(set(listeCarre))
+
+def CheckTotal(generationTab,lin,col):
+    return CheckLigne(generationTab, lin, col) and CheckColonne(generationTab, lin, col) and CheckCarre(generationTab, lin, col)
+
+def RemplirGrille():
+    return Backtrack(0, 0)
+
+def Backtrack(lin, col):
+    if lin == 9:
+        return True
+
+    next_lin, next_col = (lin, col + 1) if col < 8 else (lin + 1, 0)
+
+    if generationTab[lin][col] != 0:
+        return Backtrack(next_lin, next_col)
+
+    for val in range(1, 10):
+        generationTab[lin][col] = val
+        if CheckTotal(generationTab, lin, col):
+            if Backtrack(next_lin, next_col):
+                return True
+        generationTab[lin][col] = 0
+
+    return False
+
+def Creationtableau():
+    global answerTab
+    Initialisation()
+
+    if RemplirGrille():
+        print(generationTab)
+        answerTab = generationTab.copy()
+    else:
+        print("Échec de la génération.")
+  
+def CompterSolutions(tab):
+    compteur = [0]
+    def Solve(lin=0, col=0):
+        if lin == 9:
+            compteur[0] += 1
+            return
+        if compteur[0] > 1:  # Stop early if more than one solution
+            return
+        next_lin, next_col = (lin, col + 1) if col < 8 else (lin + 1, 0)
+
+        if tab[lin][col] != 0:
+            Solve(next_lin, next_col)
+        else:
+            for val in range(1, 10):
+                tab[lin][col] = val
+                if CheckTotal(tab, lin, col):
+                    Solve(next_lin, next_col)
+                tab[lin][col] = 0
+
+    Solve()
+    return compteur[0]
+
+def ViderCases(nb_cases_a_enlever, essais_max=500):
+    indices = [(i, j) for i in range(9) for j in range(9)]
+    nb_supprimees = 0
+    essais = 0
+    tab = answerTab.copy()
+    global playerTab
+    while nb_supprimees < nb_cases_a_enlever and essais < essais_max:
+        i, j = r.choice(indices)
+        if tab[i][j] == 0:
+            essais += 1
+            continue
+
+        sauvegarde = tab[i][j]
+        tab[i][j] = 0
+
+        copie = np.copy(tab)
+        if CompterSolutions(copie) == 1:
+            nb_supprimees += 1
+        else:
+            tab[i][j] = sauvegarde  # restaurer la valeur
+
+        essais += 1
+    playerTab = tab.copy()
+
+# === InGameFunc ===
+
+def Compare_Truth(Btn):
+    global playerTab
+    tup = np.where(ArrayButton == Btn)
+    t_x, t_y = tup[0][0], tup[1][0]
+    if GetBVal(Btn) == str(answerTab[t_x][t_y]):
+        Btn.configure(fg_color = "pale green")
+        playerTab[t_x][t_y] = GetBVal(Btn)
+    elif GetBVal(Btn) != str(answerTab[t_x][t_y]) and GetBVal(Btn) != 0:
+        Btn.configure(fg_color = "red")
+        
+def init_color():
+    pass
+
+def StrictCheck_init():
+    if StrictCheck_init:
+        Array_Truth = playerTab.astype(bool)
+        ArrayButton = ArrayButton.configure(Array_Truth)
+
+
+def SplitSquares(array):
+    Array_vsplit = np.split(array, 3)
+    Array_Squares = [np.split(v, 3, axis= 1) for v in Array_vsplit]
+    Array_Squares = [col for row in Array_Squares for col in row]
+    Array_Squares = np.array(Array_Squares)
+    return Array_Squares
+
+def onButtonClicked(x,y):
+    global CurrentBtn, i_x, i_y,i_sq
+
+    if playerTab[x][y] == 0:
+        if StrictCheck:
+            if CurrentBtn == ArrayButton[x][y]:
+                CurrentBtn.configure(fg_color = 'white')
+                CurrentBtn = None
+            elif CurrentBtn != ArrayButton[x][y] and CurrentBtn != None:
+                #if CurrentBtn.cget("fg_color") != 'pale green' or 'red':
+                    #CurrentBtn.configure(fg_color = 'white')
+                CurrentBtn = ArrayButton[x][y]
+                CurrentBtn.configure(fg_color = COLORS["bg_secondary"])
+                i_x, i_y = x,y
+                i_sq = (i_x // 3) * 3 + i_y // 3
+            else:
+                CurrentBtn = ArrayButton[x][y]
+                CurrentBtn.configure(fg_color = COLORS["bg_secondary"])
+                i_x, i_y = x,y
+                i_sq = (i_x // 3) * 3 + i_y // 3
+
+        elif CurrentBtn == ArrayButton[x][y]:
+            for v in R_rep:
+                if GetBVal(CurrentBtn) == str(v):
+                    CurrentBtn.configure(fg_color = "red")
+                    break
+                CurrentBtn.configure(fg_color = 'white')
+            CurrentBtn = None
+        elif CurrentBtn != ArrayButton[x][y] and CurrentBtn != None:
+            for v in R_rep:
+                if GetBVal(CurrentBtn) == str(v):
+                    CurrentBtn.configure(fg_color = "red")
+                    break
+                CurrentBtn.configure(fg_color = 'white')
+            CurrentBtn = ArrayButton[x][y]
+            CurrentBtn.configure(fg_color = COLORS["bg_secondary"])
+            i_x, i_y = x,y
+            i_sq = (i_x // 3) * 3 + i_y // 3
+        else:
+            CurrentBtn = ArrayButton[x][y]
+            CurrentBtn.configure(fg_color = COLORS["bg_secondary"])
+            i_x, i_y = x,y
+            i_sq = (i_x // 3) * 3 + i_y // 3
+    if CurrentBtn:
+        GetBtnPos(i_x,i_y,i_sq)
+        CheckLogic()
+
+def GetBtnPos(i_x, i_y, i_sq):
+    global CurrentRow, CurrentCol, CurrentSquare
+    CurrentRow = CurrentGrid[i_x, :]
+    CurrentCol = CurrentGrid[:, i_y]
+    CurrentSquare = Array_Squares[i_sq]
+    return CurrentRow, CurrentCol, CurrentSquare
+
+def CheckLogic():
+    if StrictCheck:
+        if np.array_equal(CurrentGrid,answerTab):
+            Victory = True
+            print("Victory!")
+            return True
+    else:
+        CheckRow(CurrentRow)
+
+def ChangeCellNum(event):
+    if CurrentBtn != None and event.char in "123456789":
+        if StrictCheck and CurrentGrid[i_x][i_y] == answerTab[i_x][i_y]:
+            return
+        CurrentBtn.configure(text = event.char,text_color="blue")
+        CurrentGrid[i_x][i_y] = event.char
+        CheckLogic()
+        Compare_Truth(CurrentBtn)
+    print(CurrentGrid)
+
+def CheckRow(CurrentRow):
+    global R_rep, R_err, err_count
+    if StrictCheck:
+        RowSol = answerTab[i_x]
+        if np.array_equal(CurrentRow,RowSol):
+            return True  
+    else:
+        if err_count == 0:
+            R_err = None
+        #creer un array des indices des valeurs != 0
+        AU_i = np.argwhere(row)
+        print(AU_i)
+        AU = np.take(row, AU_i)
+        print(AU)
+        AU = AU.flatten()
+
+        #Creer un NamedTuple contenant les valeurs et le nombres d'occurences. S'il y a des valeurs répétées, les renvoie
+        print(AU)
+        val, count = np.unique_counts(AU)
+        print(val, count)
+        R_rep = val[count > 1]
+        print(R_rep)
+        print(R_rep.size)
+    
+        if R_rep.size > 0:
+            err_count += 1
+            R_err = True
+            print(R_err, R_rep.size)
+            for button in ArrayButton[i_x]:
+                for v in R_rep:
+                    if GetBVal(button) == str(v):
+                        b_text = button.cget("text")
+                        if b_text == str(v):
+                            button.configure(fg_color = "red")
+        elif R_err == True and R_rep.size == 0:
+            print(R_err)
+            for button in ArrayButton[i_x]:
+                button.configure(fg_color = "white")
+            R_err = False
+        print(R_err)
+
+        if len(val) == 9 and not R_err:
+            return True
+
+def GetBVal(Btn):
+    B_val = Btn.cget("text")
+    return B_val
+      
+#endregion
+
+def launch_sudoku():
+    global gameGridFrame, subgrid_frames, ArrayButton, CurrentBtn, CurrentRow, CurrentCol, CurrentSquare, CurrentGrid, Array_Squares
+
+    # (Réinitialise les variables importantes)
+    CurrentBtn = None
+    CurrentRow = None
+    CurrentCol = None
+    CurrentSquare = None
+    CurrentGrid = playerTab.copy()
+    ArrayButton[:] = np.empty((9, 9), dtype=object)
+    subgrid_frames[:] = [[None] * 3 for _ in range(3)]
+    gameGridFrame = CTkFrame(GameMenu, fg_color=COLORS["bg_tertiary"], corner_radius=4, border_width=5,width = 1280, height = 720)
+    gameGridFrame.pack(pady=2, padx=2)
+
+    for i in range(3):
+        for j in range(3):
+            subgrid = CTkFrame(gameGridFrame, fg_color=COLORS["bg_tertiary"], corner_radius=0)
+            subgrid.grid(row=i, column=j, padx=2, pady=2)
+            subgrid_frames[i][j] = subgrid
+
+    for i in range(9):
+        for j in range(9):
+            parent_frame = subgrid_frames[i // 3][j // 3]
+
+            e = CTkButton(
+                parent_frame,
+                text=str(playerTab[i][j]) if playerTab[i][j] != 0 else "",
+                width=50, height=50,
+                font=("Arial", 16),
+                fg_color="white" if playerTab[i][j] == 0 else "pale green",
+                text_color="black",
+                hover_color=COLORS["bg_secondary"],
+                border_color=COLORS["bg_primary"],
+                border_width=2,
+                command=lambda x=i, y=j: onButtonClicked(x, y)
+            )
+
+            e.grid(row=i % 3, column=j % 3)
+            ArrayButton[i][j] = e
+
+    Array_Squares = SplitSquares(CurrentGrid)
+
+# === Tkinter setup ===
+
+app = CTk()
+app.bind('<Key>', ChangeCellNum)
+width, height = app.winfo_screenwidth(), app.winfo_screenheight()
+app.geometry(f"{width}x{height}")
+app.title("Kudoku Sudoku")
+app.state('zoomed')
+
+def precompute_empty_cells():
+    # Create a list of all indices (i, j) for the grid
+    indices = [(i, j) for i in range(9) for j in range(9)]
+    # Shuffle the indices to make the empty cells random, but fixed once calculated
+    r.shuffle(indices)
+    return indices
+
+# genère un ordre de case vide 
+
+precomputed_empty_cells = precompute_empty_cells()
+
+def update_difficulty(val):
+    global DifficultySliderValue
+    DifficultySliderValue = val
+    num_empty_cells = int(val)
+    apply_mask_to_grid(num_empty_cells)
+    thresholds = [65, 49, 33, 17]
+    for i, threshold in enumerate(thresholds):
+        if val >= threshold:
+            selected_difficulty = i
+            break
+    DifficultyPanel.configure(
+        text=f"{DIFFICULTY_LABELS[selected_difficulty]} - {DIFFICULTY_DESCRIPTIONS[selected_difficulty]}"
+    )
+    NumberOfDigitPanel.configure(text=f" number of digits : {int(81 - val)}")
+
+def apply_mask_to_grid(n_masques):
+    global visible_mask
+    visible_mask = np.full((9, 9), True)  # Start by assuming all cells are filled (light)
+    
+    # Mark the first n_masques cells as empty (dark)
+    for idx in range(n_masques):
+        i, j = precomputed_empty_cells[idx]
+        visible_mask[i][j] = False  # Set as empty (dark)
+    
+    update_grid_display()
+
+def update_grid_display():
+    # Update only the cells that need to change (i.e., become dark or light)
+    for i in range(9):
+        for j in range(9):
+            grid_labels[i][j].configure(
+                fg_color=COLORS["text_secondary"] if visible_mask[i][j] else COLORS["text_primary"]
+            )
+
+def GameMenuBackButton():
+    show_menu(MainMenu)
+    global generationTab, playerTab, answerTab
+    for widget in gameGridFrame.winfo_children():
+        widget.destroy()
+    gameGridFrame.destroy()
+    generationTab = np.zeros((9,9), dtype=int)
+    playerTab = np.zeros((9,9), dtype=int)
+    answerTab = np.zeros((9,9), dtype=int)
+
+def generate_game():
+    Initialisation()
+    Creationtableau()
+    ViderCases(int(DifficultySliderValue))
+    show_menu(GameMenu)
+    launch_sudoku()
+    print("Game generated!")
+
+def switch_theme():
+    mode = light_switch_var.get()
+    set_appearance_mode(mode)
+    print(f"Switched to {mode} mode.")
+
+def show_menu(menu):
+    for m in Menus:
+        m.pack_forget()
+    menu.pack(fill="both", expand=True, padx=20, pady=20)
+
+def load_progress(file):
+    data = np.load(file)
+    return data['timer'].item(), data['joueur'], data['base'], data['solution']
+
+def save_progress(file, t, joueur, base, solution):
+    np.savez(file, timer=t, joueur=joueur, base=base, solution=solution)
+
+# === GUI Menus ===
+MainMenu = CTkFrame(app)
+SecondMenu = CTkFrame(app)
+GameMenu = CTkFrame(app)
+Menus = [MainMenu, SecondMenu,GameMenu]
+
+# MainMenu Widgets
+MainTitle = CTkLabel(MainMenu, text="Kudoku Sudoku", font=(FONTS["main"], height // 5), text_color=COLORS["text_secondary"])
+PlayButton = CTkButton(MainMenu, text="Play", command=lambda: show_menu(SecondMenu), corner_radius=32,
+                       hover_color=COLORS["text_primary"], fg_color=COLORS["text_secondary"],
+                       font=(FONTS["secondary"], height // 15))
+ReloadButton = CTkButton(MainMenu, text="Reload", command=lambda: print("Reload clicked"), corner_radius=32,
+                         hover_color=COLORS["text_primary"], fg_color=COLORS["text_secondary"],
+                         font=(FONTS["secondary"], height // 15))
+light_switch_var = StringVar(value="dark")
+LightSwitch = CTkSwitch(MainMenu, text="LightMode", variable=light_switch_var, onvalue="dark", offvalue="light",
+                        command=switch_theme, progress_color=COLORS["text_primary"])
+Credits = CTkLabel(MainMenu, text="Created by:\n" + "\n".join(f"{' ' * (i*12)}{name}" for i, name in enumerate(CREDITS)),
+                   font=(FONTS["secondary"], height // 40), text_color=COLORS["text_secondary"])
+
+Credits.place(rely=0.95, relx=0, x=0, y=0, anchor=tk.SW)
+MainTitle.pack(side="top", fill=tk.X)
+PlayButton.pack(pady=10)
+ReloadButton.pack(pady=10)
+LightSwitch.pack(side="bottom")
+
+# SecondMenu Widgets
+GenerateButton = CTkButton(SecondMenu, text="Generate", command=generate_game, corner_radius=32,
+                           hover_color=COLORS["text_primary"], fg_color=COLORS["text_secondary"],
+                           font=(FONTS["secondary"], height // 15))
+BackButton = CTkButton(SecondMenu, text="Back", command=lambda: show_menu(MainMenu), corner_radius=32,
+                       hover_color=COLORS["text_primary"], fg_color=COLORS["text_secondary"],
+                       font=(FONTS["secondary"], height // 15))
+DifficultyPanel = CTkLabel(SecondMenu, text="", font=(FONTS["main"], height // 40), text_color=COLORS["text_secondary"])
+NumberOfDigitPanel = CTkLabel(SecondMenu, text="", font=(FONTS["secondary"], height // 45))
+DifficultySlider = CTkSlider(SecondMenu, from_=0, to=81, command=update_difficulty, number_of_steps=81,
+                             orientation='vertical', progress_color=COLORS["text_secondary"])
+
+grid_frame = CTkFrame(SecondMenu)
+for i in range(9):
+    row = []
+    for j in range(9):
+        label = CTkLabel(grid_frame, text="", width=40, height=40, font=(FONTS["secondary"], 20),
+                         corner_radius=8, fg_color=COLORS["bg_primary"])
+        label.grid(row=i, column=j, padx=2, pady=2)
+        row.append(label)
+    grid_labels.append(row)
+
+# Layout
+BackButton.grid(row=7, column=2, columnspan=2)
+GenerateButton.grid(row=5, column=2, columnspan=2)
+DifficultySlider.grid(row=2, column=5, rowspan=5)
+DifficultyPanel.grid(row=1, column=6, columnspan=5)
+NumberOfDigitPanel.grid(row=4, column=3)
+grid_frame.grid(row=3, column=6, rowspan=5, columnspan=5)
+
+# GameMenu Widgets
+
+gameGridFrame = CTkFrame(GameMenu)
+gameMenuBackButton = CTkButton(GameMenu, text="Back", command=GameMenuBackButton, corner_radius=32,
+                       hover_color=COLORS["text_primary"], fg_color=COLORS["text_secondary"],
+                       font=(FONTS["secondary"], height // 15))
+
+gameMenuBackButton.pack()
+
+# Initial state
+update_difficulty(40)
+show_menu(MainMenu)
+
+# Start Tkinter main loop
+app.mainloop()
+print(generationTab)

@@ -1,8 +1,6 @@
 import numpy as np
 import random as r
 
-listeTot = [1]*9 + [2]*9 + [3]*9 + [4]*9 + [5]*9 + [6]*9 + [7]*9 + [8]*9 + [9]*9
-r.shuffle(listeTot)
 tab = np.zeros((9,9), dtype=int)
 
 
@@ -15,21 +13,12 @@ def GenererCarreAleatoire(x,y):
         for j in range (y,y+3):
             tab[i][j] = liste.pop()
 
-def GenererDiagonaleAleatoire():
+def Initialisation():
     GenererCarreAleatoire(0,0)
     GenererCarreAleatoire(3,3)
     GenererCarreAleatoire(6,6)
 
-def SupprimerDeListeTot():
-    for lin in tab:
-        for elem in lin:
-            if elem != 0 and elem in listeTot:
-                listeTot.remove(elem)
-
-def Initialisation():
-    GenererDiagonaleAleatoire()
-    SupprimerDeListeTot()
-
+Initialisation()
 
 # conditions sudoku --------------------------------------------------------------------------------
 
@@ -73,34 +62,28 @@ def CheckCarre(tab, lin, col):
 def CheckTotal(tab,lin,col):
     return CheckLigne(tab, lin, col) and CheckColonne(tab, lin, col) and CheckCarre(tab, lin, col)
 
-
-# génération de la grille solution (aide de chat gpt) --------------------------------------------------------------------------
+# génération de la grille solution --------------------------------------------------------------------------
 
 def RemplirGrille():
     return Backtrack(0, 0)
 
 def Backtrack(lin, col):
     if lin == 9:
-        return True  
+        return True
 
     next_lin, next_col = (lin, col + 1) if col < 8 else (lin + 1, 0)
 
     if tab[lin][col] != 0:
         return Backtrack(next_lin, next_col)
 
-    for i in range(len(listeTot)):
-        val = listeTot[i]
+    for val in range(1, 10):
         tab[lin][col] = val
         if CheckTotal(tab, lin, col):
-
-            temp = listeTot.pop(i)
             if Backtrack(next_lin, next_col):
                 return True
-            
-            listeTot.insert(i, temp)
-        tab[lin][col] = 0  
+        tab[lin][col] = 0
 
-    return False  
+    return False
 
 def Creationtableau():
     Initialisation()
@@ -114,23 +97,102 @@ def Creationtableau():
 Creationtableau()
 
 
-# création grille à trous --------------------------------------------------------------------------
+# création grille à trous avec une seule solution --------------------------------------------------
 
-def ViderCases(num):
+def CompterSolutions(tab):
+    compteur = [0]
+    def Solve(lin=0, col=0):
+        if lin == 9:
+            compteur[0] += 1
+            return
+        if compteur[0] > 1:  # Stop early if more than one solution
+            return
+        next_lin, next_col = (lin, col + 1) if col < 8 else (lin + 1, 0)
 
+        if tab[lin][col] != 0:
+            Solve(next_lin, next_col)
+        else:
+            for val in range(1, 10):
+                tab[lin][col] = val
+                if CheckTotal(tab, lin, col):
+                    Solve(next_lin, next_col)
+                tab[lin][col] = 0
+
+    Solve()
+    return compteur[0]
+
+def ViderCasesUnique(nb_cases_a_enlever, essais_max=500):
     indices = [(i, j) for i in range(9) for j in range(9)]
-    r.shuffle(indices)
-    
-    for k in range(num):
-        i, j = indices[k]
-        tab[i][j] = 0
-                    
-ViderCases(50)
+    nb_supprimees = 0
+    essais = 0
 
+    while nb_supprimees < nb_cases_a_enlever and essais < essais_max:
+        i, j = r.choice(indices)
+        if tab[i][j] == 0:
+            essais += 1
+            continue
+
+        sauvegarde = tab[i][j]
+        tab[i][j] = 0
+
+        copie = np.copy(tab)
+        if CompterSolutions(copie) == 1:
+            nb_supprimees += 1
+        else:
+            tab[i][j] = sauvegarde  # restaurer la valeur
+
+        essais += 1
+
+ViderCasesUnique(50)
 print(tab)
 
 
-# algorithme pour vérifier qu'il n'y ait qu'une seule solution -------------------------------------
+#check non nécessaire
+
+def est_valide(grille, ligne, col, num):
+    # Vérifie la ligne
+    if num in grille[ligne]:
+        return False
+
+    # Vérifie la colonne
+    if num in [grille[i][col] for i in range(9)]:
+        return False
+
+    # Vérifie le carré 3x3
+    start_ligne, start_col = 3 * (ligne // 3), 3 * (col // 3)
+    for i in range(start_ligne, start_ligne + 3):
+        for j in range(start_col, start_col + 3):
+            if grille[i][j] == num:
+                return False
+
+    return True
+
+def trouver_vide(grille):
+    for i in range(9):
+        for j in range(9):
+            if grille[i][j] == 0:
+                return i, j
+    return None
+
+def compter_solutions(grille):
+    pos = trouver_vide(grille)
+    if not pos:
+        return 1  # Une solution trouvée
+
+    ligne, col = pos
+    total = 0
+    for num in range(1, 10):
+        if est_valide(grille, ligne, col, num):
+            grille[ligne][col] = num
+            total += compter_solutions(grille)
+            grille[ligne][col] = 0  # backtrack
+
+    return total
+
+
+nb_solutions = compter_solutions(tab)
+print("Nombre de solutions :", nb_solutions)
+
 
 
 

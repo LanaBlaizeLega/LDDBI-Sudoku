@@ -1,117 +1,146 @@
 import tkinter as tk
-from PIL import Image, ImageTk 
+from tkinter import StringVar
 from customtkinter import *
 import numpy as np
+import random as rnd
 
-#region CONSTANT & VARIABLES
+# === Constants ===
+COLORS = {
+    "text_primary": "#C56135",  # Color for empty cells (dark)
+    "text_secondary": "#ED9B40",  # Color for filled cells (light)
+    "bg_primary": "#93B1A7",
+    "bg_secondary": "#7A918D",
+    "bg_tertiary": "#9AC1A2"
+}
 
-TXTCOL1 = "#C56135"
-TXTCOL2 = "#ED9B40"
-BGCOL1 = "#93B1A7"
-BGCOL2 = "#7A918D"
-BGCOL3 = "#9AC1A2"
+FONTS = {
+    "main": "Segoe UI",
+    "secondary": "Arial"
+}
 
-MAINTYPO = "Cascadia Code"
-TYPOBIS = "Ink Free"
+# === Globals ===
+grid_labels = []
+precomputed_empty_cells = []
+visible_mask = np.full((9, 9), False)  # Initial mask where False = empty (dark), True = filled (light)
 
-created_by = "Created by :"
-names = ["Abigael Roche", "Lana Blaise", "Félix Plaine-Forgues"]
-aligned_text = f"{created_by:1}{names[0]}\n{'':14}{names[1]}\n{'':26}{names[2]}"
-difficulty_strings = ["mathematicaly impossible","so... you Do want to be alone","Still want to have fun eh","Dont need much time to do this one"]
-difficulty_name = ["Impossible","Master","Normal","Easy"]
-SelectedDifficulty = 3
-timer = 0  # minutes écoulée  
+# === Tkinter setup ===
+app = CTk()
+width, height = app.winfo_screenwidth(), app.winfo_screenheight()
+app.geometry(f"{width}x{height}")
+app.title("Kudoku Sudoku")
+app.state('zoomed')
 
-grille_joueur = np.zeros((9, 9))  
-grille_base = np.zeros((9, 9)) 
-grille_solution = np.zeros((9, 9))  
+def precompute_empty_cells():
+    # Create a list of all indices (i, j) for the grid
+    indices = [(i, j) for i in range(9) for j in range(9)]
+    # Shuffle the indices to make the empty cells random, but fixed once calculated
+    rnd.shuffle(indices)
+    return indices
 
-displayGrid = np.zeros((9, 9), dtype=int)
+# Generate the order of empty cells (shuffled)
+precomputed_empty_cells = precompute_empty_cells()
 
+def update_difficulty(val):
+    # Map slider value (0-81) to number of empty cells
+    num_empty_cells = int(val)
+    apply_mask_to_grid(num_empty_cells)
 
-
-#endregion
-#region MENU_FONCTION
-def LoadProgress(fichier):
-    data = np.load(fichier)
-    timer = data['timer'].item()  # Convertir en int
-    grille_joueur = data['joueur']
-    grille_base = data['base']
-    grille_solution = data['solution']
+def apply_mask_to_grid(n_masques):
+    global visible_mask
+    visible_mask = np.full((9, 9), True)  # Start by assuming all cells are filled (light)
     
-    return timer, grille_joueur, grille_base, grille_solution
-
-def SaveProgress(fichier, timer, grille_joueur, grille_base, grille_solution):
-    np.savez(fichier, timer=timer, joueur=grille_joueur, base=grille_base, solution=grille_solution)
+    # Mark the first n_masques cells as empty (dark)
+    for idx in range(n_masques):
+        i, j = precomputed_empty_cells[idx]
+        visible_mask[i][j] = False  # Set as empty (dark)
     
-def UpdateDisplayGrid():
-    indices_zeros = np.argwhere(displayGrid == 0)
-    index = indices_zeros[np.random.choice(len(indices_zeros))]
-    displayGrid[tuple(index)] = 1
+    update_grid_display()
 
+def update_grid_display():
+    # Update only the cells that need to change (i.e., become dark or light)
+    for i in range(9):
+        for j in range(9):
+            grid_labels[i][j].configure(
+                fg_color=COLORS["text_secondary"] if visible_mask[i][j] else COLORS["text_primary"]
+            )
 
-def Play():
-    print("ChoosingDifficultyMenu")
+def generate_game():
+    # Placeholder for game generation logic
+    print("Game generated!")
 
-def Reload():
-    print("ReloadASudokuMenu")
-
-def LeaveApp():
-    pass
-    #destroy etc
-
-def SwitchLightMode():
+def switch_theme():
     mode = light_switch_var.get()
     set_appearance_mode(mode)
-    print(mode)
+    print(f"Switched to {mode} mode.")
 
-def UpdateDifficulty(difficulty_level):
-    if difficulty_level >= 65:
-        SelectedDifficulty = 3
-    elif difficulty_level >= 49:
-        SelectedDifficulty = 2
-    elif difficulty_level >= 33:
-        SelectedDifficulty = 1
-    elif difficulty_level >= 17:
-        SelectedDifficulty = 0
+def show_menu(menu):
+    for m in Menus:
+        m.pack_forget()
+    menu.pack(fill="both", expand=True, padx=20, pady=20)
 
-    DifficultyPanel['text'] = difficulty_name[SelectedDifficulty] + " - " + difficulty_strings[SelectedDifficulty] 
-#enregion
-#region WIDGET_DEFINITION
+def load_progress(file):
+    data = np.load(file)
+    return data['timer'].item(), data['joueur'], data['base'], data['solution']
 
-MainRoot = CTk()
 
-width = MainRoot.winfo_screenwidth()
-height = MainRoot.winfo_screenheight()
-MainRoot.geometry(f"{width}x{height}")
-MainRoot.title("Kudoku Sudoku")
-MainRoot.state('zoomed') 
+def save_progress(file, t, joueur, base, solution):
+    np.savez(file, timer=t, joueur=joueur, base=base, solution=solution)
 
-MainTitle = CTkLabel(MainRoot, text = "Kudoku Sudoku",text_color=TXTCOL2,font=(MAINTYPO,height/5))
-DifficultyPanel = CTkLabel(MainRoot, text = difficulty_name[SelectedDifficulty] + "- " + difficulty_strings[SelectedDifficulty] ,text_color=TXTCOL2,font=(MAINTYPO,height/40))
-   
-Credits = CTkLabel(MainRoot, text = aligned_text,text_color=TXTCOL2,font=(TYPOBIS,height/40))
+# === GUI Menus ===
+MainMenu = CTkFrame(app)
+SecondMenu = CTkFrame(app)
+Menus = [MainMenu, SecondMenu]
 
-PlayButton = CTkButton(MainRoot, text = "Play",corner_radius=32, command = Play,hover_color=TXTCOL1,fg_color=TXTCOL2,font=(TYPOBIS,height/15))
-ReloadButton = CTkButton(MainRoot, text = "Reload",corner_radius=32, command = Reload,hover_color=TXTCOL1,fg_color=TXTCOL2,font=(TYPOBIS,height/15))
-
+# MainMenu Widgets
+MainTitle = CTkLabel(MainMenu, text="Kudoku Sudoku", font=(FONTS["main"], height // 5), text_color=COLORS["text_secondary"])
+PlayButton = CTkButton(MainMenu, text="Play", command=lambda: show_menu(SecondMenu), corner_radius=32,
+                       hover_color=COLORS["text_primary"], fg_color=COLORS["text_secondary"],
+                       font=(FONTS["secondary"], height // 15))
+ReloadButton = CTkButton(MainMenu, text="Reload", command=lambda: print("Reload clicked"), corner_radius=32,
+                         hover_color=COLORS["text_primary"], fg_color=COLORS["text_secondary"],
+                         font=(FONTS["secondary"], height // 15))
 light_switch_var = StringVar(value="dark")
-LightSwitch = CTkSwitch(master=MainRoot, text="LightMode", command=SwitchLightMode,variable=light_switch_var, onvalue="dark", offvalue="light",progress_color=TXTCOL1)
+LightSwitch = CTkSwitch(MainMenu, text="LightMode", variable=light_switch_var, onvalue="dark", offvalue="light",
+                        command=switch_theme, progress_color=COLORS["text_primary"])
 
-DifficultySlider = CTkSlider(MainRoot, from_=0, to=81,command=UpdateDifficulty,number_of_steps=81,orientation='vertical',progress_color=TXTCOL2)
-#region PLACEMENTS
-
-#Panels
-MainTitle.pack(side="top", fill= tk.X)
-Credits.place(rely=0.95, relx=0, x=0, y=0, anchor=SW)
-
-#Buttons
+MainTitle.pack(side="top", fill=tk.X)
 PlayButton.pack(pady=10)
 ReloadButton.pack(pady=10)
-#Switchs
 LightSwitch.pack(side="bottom")
-#Sliders
-DifficultySlider.pack(side="right")
-DifficultyPanel.pack(side="right")
-MainRoot.mainloop()
 
+# SecondMenu Widgets
+GenerateButton = CTkButton(SecondMenu, text="Generate", command=generate_game, corner_radius=32,
+                           hover_color=COLORS["text_primary"], fg_color=COLORS["text_secondary"],
+                           font=(FONTS["secondary"], height // 15))
+BackButton = CTkButton(SecondMenu, text="Back", command=lambda: show_menu(MainMenu), corner_radius=32,
+                       hover_color=COLORS["text_primary"], fg_color=COLORS["text_secondary"],
+                       font=(FONTS["secondary"], height // 15))
+DifficultyPanel = CTkLabel(SecondMenu, text="", font=(FONTS["main"], height // 40), text_color=COLORS["text_secondary"])
+NumberOfDigitPanel = CTkLabel(SecondMenu, text="", font=(FONTS["secondary"], height // 45))
+DifficultySlider = CTkSlider(SecondMenu, from_=0, to=81, command=update_difficulty, number_of_steps=81,
+                             orientation='vertical', progress_color=COLORS["text_secondary"])
+
+grid_frame = CTkFrame(SecondMenu)
+for i in range(9):
+    row = []
+    for j in range(9):
+        label = CTkLabel(grid_frame, text="", width=40, height=40, font=(FONTS["secondary"], 20),
+                         corner_radius=8, fg_color=COLORS["bg_primary"])
+        label.grid(row=i, column=j, padx=2, pady=2)
+        row.append(label)
+    grid_labels.append(row)
+
+# Layout
+BackButton.grid(row=7, column=2, columnspan=2)
+GenerateButton.grid(row=5, column=2, columnspan=2)
+DifficultySlider.grid(row=2, column=5, rowspan=5)
+DifficultyPanel.grid(row=1, column=6, columnspan=5)
+NumberOfDigitPanel.grid(row=5, column=3)
+grid_frame.grid(row=3, column=6, rowspan=5, columnspan=5)
+
+# Initial state
+update_difficulty(30)
+show_menu(MainMenu)
+
+# Start Tkinter main loop
+app.mainloop()
