@@ -180,7 +180,8 @@ def onButtonClicked(x,y):
                 CurrentBtn.configure(fg_color = 'white')
                 CurrentBtn = None
             elif CurrentBtn != ArrayButton[x][y] and CurrentBtn != None:
-                CurrentBtn.configure(fg_color = 'white')
+                #if CurrentBtn.cget("fg_color") != 'pale green' or 'red':
+                    #CurrentBtn.configure(fg_color = 'white')
                 CurrentBtn = ArrayButton[x][y]
                 CurrentBtn.configure(fg_color = COLORS["bg_secondary"])
                 i_x, i_y = x,y
