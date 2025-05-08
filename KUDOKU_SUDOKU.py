@@ -426,6 +426,16 @@ def update_grid_display():
                 fg_color=COLORS["text_secondary"] if visible_mask[i][j] else COLORS["text_primary"]
             )
 
+def GameMenuBackButton():
+    show_menu(MainMenu)
+    global generationTab, playerTab, answerTab
+    for widget in gameGridFrame.winfo_children():
+        widget.destroy()
+    gameGridFrame.destroy()
+    generationTab = np.zeros((9,9), dtype=int)
+    playerTab = np.zeros((9,9), dtype=int)
+    answerTab = np.zeros((9,9), dtype=int)
+
 def generate_game():
     Initialisation()
     Creationtableau()
@@ -506,10 +516,11 @@ DifficultySlider.grid(row=2, column=5, rowspan=5)
 DifficultyPanel.grid(row=1, column=6, columnspan=5)
 NumberOfDigitPanel.grid(row=4, column=3)
 grid_frame.grid(row=3, column=6, rowspan=5, columnspan=5)
+
 # GameMenu Widgets
 
 gameGridFrame = CTkFrame(GameMenu)
-gameMenuBackButton = CTkButton(GameMenu, text="Back", command=lambda: show_menu(MainMenu), corner_radius=32,
+gameMenuBackButton = CTkButton(GameMenu, text="Back", command=GameMenuBackButton, corner_radius=32,
                        hover_color=COLORS["text_primary"], fg_color=COLORS["text_secondary"],
                        font=(FONTS["secondary"], height // 15))
 
