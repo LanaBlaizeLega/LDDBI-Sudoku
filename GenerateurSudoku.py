@@ -192,3 +192,9 @@ def compter_solutions(grille):
 
 nb_solutions = compter_solutions(tab)
 print("Nombre de solutions :", nb_solutions)
+
+
+
+
+
+

@@ -133,15 +133,51 @@ def Creationtableau():
     else:
         print("Échec de la génération.")
   
-def ViderCases(num):
-    global playerTab
+def CompterSolutions(tab):
+    compteur = [0]
+    def Solve(lin=0, col=0):
+        if lin == 9:
+            compteur[0] += 1
+            return
+        if compteur[0] > 1:  # Stop early if more than one solution
+            return
+        next_lin, next_col = (lin, col + 1) if col < 8 else (lin + 1, 0)
+
+        if tab[lin][col] != 0:
+            Solve(next_lin, next_col)
+        else:
+            for val in range(1, 10):
+                tab[lin][col] = val
+                if CheckTotal(tab, lin, col):
+                    Solve(next_lin, next_col)
+                tab[lin][col] = 0
+
+    Solve()
+    return compteur[0]
+
+def ViderCases(nb_cases_a_enlever, essais_max=500):
     indices = [(i, j) for i in range(9) for j in range(9)]
-    r.shuffle(indices)
-    
-    for k in range(num):
-        i, j = indices[k]
-        generationTab[i][j] = 0
-        playerTab = generationTab.copy()
+    nb_supprimees = 0
+    essais = 0
+    tab = answerTab.copy()
+    global playerTab
+    while nb_supprimees < nb_cases_a_enlever and essais < essais_max:
+        i, j = r.choice(indices)
+        if tab[i][j] == 0:
+            essais += 1
+            continue
+
+        sauvegarde = tab[i][j]
+        tab[i][j] = 0
+
+        copie = np.copy(tab)
+        if CompterSolutions(copie) == 1:
+            nb_supprimees += 1
+        else:
+            tab[i][j] = sauvegarde  # restaurer la valeur
+
+        essais += 1
+    playerTab = tab.copy()
 
 # === InGameFunc ===
 
