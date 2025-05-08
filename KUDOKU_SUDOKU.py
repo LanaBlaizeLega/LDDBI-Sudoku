@@ -667,8 +667,10 @@ pauseButton = CTkButton(BtnFrame, text="pause", command=pause, corner_radius=32,
                        font=(FONTS["secondary"], height // 15))
 
 timer_label = CTkLabel(GameMenu, text="Temps: 00:00",font=(FONTS["secondary"], height // 20))
+hintButton = CTkButton(GameMenu, text="Aide", fg_color=COLORS["text_secondary"], font=(FONTS["secondary"], height // 20))
 
 
+hintButton.pack(anchor=E)
 timer_label.pack(pady = 10)
 gameMenuLives.pack(pady = 10)
 BtnFrame.pack(side=BOTTOM,pady = 20)
@@ -705,8 +707,7 @@ ListeDeSaves.pack(side = LEFT,expand=True)
 BackButtonBis.pack(side = LEFT,expand=True)
 
 
-hintButton = CTkButton(GameMenu, text="Aide", fg_color=COLORS["text_secondary"], font=(FONTS["secondary"], height // 15))
-hintButton.pack()
+
 # Initial state
 update_difficulty(40)
 show_menu(MainMenu)
