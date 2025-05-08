@@ -728,19 +728,19 @@ BackButton = CTkButton(LossMenu, text="Back", command=lambda: show_menu(MainMenu
                       hover_color=COLORS["text_primary"], fg_color=COLORS["text_secondary"],
                       font=(FONTS["secondary"], height // 15))
 
-# Create a frame for the answer grid
 answer_grid_frame = CTkFrame(LossMenu)
 answer_grid_subframes = [[None] * 3 for _ in range(3)]
 
-# Define the positions that should be tinted red
 red_positions = [
-    (1,1), (2,1), (3,1), (1,6), (2,6), (3,6), 
-    (1,8), (2,8), (3,8), (6,1), (7,1), (8,1),
-    (6,3), (7,3), (8,3), (6,5), (7,5), (8,5), 
+    (1,0), (2,0), (3,0), 
+    (1,5), (2,5), (3,5), 
+    (1,7), (2,7), (3,7), 
+    (6,0), (7,0), (8,0),
+    (6,2), (7,2), (8,2),
+    (6,5), (7,5), (8,5),
     (8,7), (8,8)
 ]
 
-# Create the answer grid
 for i in range(3):
     for j in range(3):
         subframe = CTkFrame(answer_grid_frame, fg_color=COLORS["bg_tertiary"], corner_radius=0)
@@ -752,7 +752,6 @@ for i in range(9):
     for j in range(9):
         parent_frame = answer_grid_subframes[i // 3][j // 3]
         
-        # Determine the button color
         if i == 4 or j == 4:  # 5th row or column (0-indexed)
             btn_color = "black"
             text_color = "white"
@@ -776,7 +775,6 @@ for i in range(9):
         btn.grid(row=i % 3, column=j % 3)
         answer_buttons[i][j] = btn
 
-# Pack the widgets
 LossLabel.pack(pady=20)
 answer_grid_frame.pack(pady=20)
 BackButton.pack(pady=20)
