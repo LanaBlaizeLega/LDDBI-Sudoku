@@ -627,6 +627,8 @@ def PrefabMaking():
 
         generate_prefab_sudoku(f"{DIFFICULTY_LABELS[difficulty]} {i} trous", i)
 
+def Quit():
+    app.destroy()
 # === GUI Menus ===
 MainMenu = CTkFrame(app)
 SecondMenu = CTkFrame(app)
@@ -643,6 +645,9 @@ MainTitle = CTkLabel(MainMenu, text="Kudoku Sudoku", font=(FONTS["main"], height
 PlayButton = CTkButton(MainMenu, text="Play", command=lambda: show_menu(SecondMenu), corner_radius=32,
                        hover_color=COLORS["text_primary"], fg_color=COLORS["text_secondary"],
                        font=(FONTS["secondary"], height // 15))
+QuitButton = CTkButton(MainMenu, text="quit", command=Quit, corner_radius=32,
+                       hover_color=COLORS["text_primary"], fg_color=COLORS["text_secondary"],
+                       font=(FONTS["secondary"], height // 15))
 ReloadButton = CTkButton(MainMenu, text="Reload", command=lambda : show_menu(LoadMenu), corner_radius=32,
                          hover_color=COLORS["text_primary"], fg_color=COLORS["text_secondary"],
                          font=(FONTS["secondary"], height // 15))
@@ -655,8 +660,11 @@ Credits = CTkLabel(MainMenu, text="Created by:\n" + "\n".join(f"{' ' * (i*12)}{n
 Credits.place(rely=0.95, relx=0, x=0, y=0, anchor=tk.SW)
 MainTitle.pack(side="top", fill=tk.X)
 PlayButton.pack(pady=10)
+
 ReloadButton.pack(pady=10)
 LightSwitch.pack(side="bottom")
+QuitButton.pack(pady=10,anchor=SE,side=BOTTOM)
+
 #PrefabBTN.pack()
 # SecondMenu Widgets
 GenerateButton = CTkButton(SecondMenu, text="Generate", command=generate_game, corner_radius=32,
@@ -710,7 +718,7 @@ hintButton = CTkButton(GameMenu, text="Aide", fg_color=COLORS["text_secondary"],
 hintButton.pack(anchor=E)
 timer_label.pack(pady = 10)
 gameMenuLives.pack(pady = 10)
-BtnFrame.pack(side=BOTTOM,pady = 20)
+BtnFrame.pack(side=BOTTOM,pady = 10)
 saveButton.pack(side=LEFT,padx = 10)
 pauseButton.pack(side=LEFT,padx = 10)
 gameMenuBackButton.pack(side=RIGHT,padx = 10)
