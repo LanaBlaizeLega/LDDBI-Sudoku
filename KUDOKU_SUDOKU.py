@@ -130,8 +130,6 @@ def Backtrack(lin, col):
 
     return False
 
-
-
 def Creationtableau():
     global answerTab
     Initialisation()
