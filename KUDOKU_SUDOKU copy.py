@@ -702,7 +702,7 @@ UnpauseButton.pack(side=LEFT,expand=True)
 LossLabel = CTkLabel(LossMenu,text="Perdus !",fg_color=COLORS["text_secondary"],
                        font=(FONTS["secondary"], height // 10))
 
-BackButton = CTkButton(LossMenu, text="Back", command=lambda: show_menu(MainMenu), corner_radius=32,
+BackButton = CTkButton(LossMenu, text="Back",command=GameMenuBackButton, corner_radius=32,
                        hover_color=COLORS["text_primary"], fg_color=COLORS["text_secondary"],
                        font=(FONTS["secondary"], height // 15))
 LossLabel.pack(expand=True)
@@ -724,7 +724,7 @@ BackButtonBis.pack(side = LEFT,expand=True)
 LossLabel = CTkLabel(LossMenu, text="Is this ?...", fg_color=COLORS["text_secondary"],
                     font=(FONTS["secondary"], height // 10))
 
-BackButton = CTkButton(LossMenu, text="Back", command=lambda: show_menu(MainMenu), corner_radius=32,
+BackButton = CTkButton(LossMenu, text="Back", command=GameMenuBackButton, corner_radius=32,
                       hover_color=COLORS["text_primary"], fg_color=COLORS["text_secondary"],
                       font=(FONTS["secondary"], height // 15))
 

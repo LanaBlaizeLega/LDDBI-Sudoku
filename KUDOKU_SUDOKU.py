@@ -215,14 +215,24 @@ def Compare_Truth(Btn):
 
 
 def loss():
-    global running
+    global running,lives
     for subgrid in gameGridFrame.winfo_children():
         for btn in subgrid.winfo_children():
             btn.configure(state= 'disabled')
+    lives = 3
     stop_timer()
     show_menu(LossMenu)
     
-
+def win():
+    global running, lives
+    running = False
+    show_menu(WinMenu)
+    update_win_timer()
+    stop_timer()
+    lives = 3
+    for subgrid in gameGridFrame.winfo_children():
+        for btn in subgrid.winfo_children():
+            btn.configure(state= 'disabled')
 def SplitSquares(array):
     # renvoie un carré des carrés 3x3
     Array_vsplit = np.split(array, 3)
@@ -291,8 +301,7 @@ def GetBtnPos(i_x, i_y, i_sq):
 def CheckLogic():
     if StrictCheck:
         if np.array_equal(CurrentGrid,answerTab):
-            running = False
-            print("Victory!" )
+            win()
             return True
     else:
         CheckRow(CurrentRow)
@@ -378,6 +387,7 @@ def launch_sudoku():
     global gameGridFrame, subgrid_frames, ArrayButton, CurrentBtn, CurrentRow, CurrentCol, CurrentSquare, CurrentGrid, Array_Squares, parent_frame
 
     # (Réinitialise les variables importantes)
+    gameMenuLives.configure(text= "vie(s) restante(s) : " + str(lives) + "/3")
     CurrentBtn = None
     CurrentRow = None
     CurrentCol = None
@@ -424,6 +434,13 @@ def update_timer():
     timer_label.configure(text=f"Temps: {minutes:02}:{secs:02}")
     timer_id = app.after(1000, update_timer)
 
+def update_win_timer():
+    global seconds, timer_id
+    seconds += 1
+    minutes = seconds // 60
+    secs = seconds % 60
+    win_timer_label.configure(text=f"Temps: {minutes:02}:{secs:02}")
+    
 def start_timer():
     global running, timer_id
     if running:
@@ -513,12 +530,17 @@ def GameMenuBackButton():
     baseTab = np.zeros((9,9), dtype=int)
 
 def generate_game():
-    global lives
+    global lives,err_count,generationTab,playerTab,answerTab,baseTab
+    generationTab = np.zeros((9,9), dtype=int)
+    playerTab = np.zeros((9,9), dtype=int)
+    answerTab = np.zeros((9,9), dtype=int)
+    baseTab = np.zeros((9,9), dtype=int)
 
     Initialisation()
     Creationtableau()
     ViderCases(int(DifficultySliderValue))
     lives = 3
+    err_count = 0
     show_menu(GameMenu)
     launch_sudoku()
     reset_timer()
@@ -612,10 +634,11 @@ GameMenu = CTkFrame(app)
 LoadMenu = CTkFrame(app)
 PauseMenu = CTkFrame(app)
 LossMenu = CTkFrame(app)
-Menus = [MainMenu, SecondMenu,GameMenu,LoadMenu,PauseMenu,LossMenu]
+WinMenu = CTkFrame(app)
+Menus = [MainMenu, SecondMenu,GameMenu,LoadMenu,PauseMenu,LossMenu,WinMenu]
 
 # MainMenu Widgets
-PrefabBTN = CTkButton(MainMenu,text="prefab",command=PrefabMaking)
+#PrefabBTN = CTkButton(MainMenu,text="prefab",command=PrefabMaking)
 MainTitle = CTkLabel(MainMenu, text="Kudoku Sudoku", font=(FONTS["main"], height // 5), text_color=COLORS["text_secondary"])
 PlayButton = CTkButton(MainMenu, text="Play", command=lambda: show_menu(SecondMenu), corner_radius=32,
                        hover_color=COLORS["text_primary"], fg_color=COLORS["text_secondary"],
@@ -634,7 +657,7 @@ MainTitle.pack(side="top", fill=tk.X)
 PlayButton.pack(pady=10)
 ReloadButton.pack(pady=10)
 LightSwitch.pack(side="bottom")
-PrefabBTN.pack()
+#PrefabBTN.pack()
 # SecondMenu Widgets
 GenerateButton = CTkButton(SecondMenu, text="Generate", command=generate_game, corner_radius=32,
                            hover_color=COLORS["text_primary"], fg_color=COLORS["text_secondary"],
@@ -699,14 +722,26 @@ UnpauseButton = CTkButton(PauseMenu, text="UN - Pause", command=unpause, corner_
 
 UnpauseButton.pack(side=LEFT,expand=True)
 # === LossMenu ===
-LossLabel = CTkLabel(LossMenu,text="Perdus !",fg_color=COLORS["text_secondary"],
-                       font=(FONTS["secondary"], height // 10))
+LossLabel = CTkLabel(LossMenu, text="Perdus !", font=(FONTS["main"], height // 5), text_color=COLORS["text_secondary"])
 
-BackButton = CTkButton(LossMenu, text="Back", command=lambda: show_menu(MainMenu), corner_radius=32,
+
+BackButton = CTkButton(LossMenu, text="Back", command=GameMenuBackButton, corner_radius=32,
                        hover_color=COLORS["text_primary"], fg_color=COLORS["text_secondary"],
                        font=(FONTS["secondary"], height // 15))
 LossLabel.pack(expand=True)
-UnpauseButton.pack(expand=True)
+BackButton.pack(expand=True)
+# === WinMenu ===
+WinLabel = CTkLabel(WinMenu, text="Gagnés !", font=(FONTS["main"], height // 5), text_color=COLORS["text_secondary"])
+
+
+WinBackButton = CTkButton(WinMenu, text="Back", command=GameMenuBackButton, corner_radius=32,
+                       hover_color=COLORS["text_primary"], fg_color=COLORS["text_secondary"],
+                       font=(FONTS["secondary"], height // 15))
+
+win_timer_label = CTkLabel(WinMenu, text="Temps: 00:00",font=(FONTS["secondary"], height // 20))
+win_timer_label.pack()
+WinLabel.pack(expand=True)
+WinBackButton.pack(expand=True)
 
 # === LoadMenu ===
 script_dir = os.path.dirname(os.path.abspath(__file__))
