@@ -730,7 +730,7 @@ UnpauseButton = CTkButton(PauseMenu, text="UN - Pause", command=unpause, corner_
 
 UnpauseButton.pack(side=LEFT,expand=True)
 # === LossMenu ===
-LossLabel = CTkLabel(LossMenu, text="Perdus !", font=(FONTS["main"], height // 5), text_color=COLORS["text_secondary"])
+LossLabel = CTkLabel(LossMenu, text="Perdu !", font=(FONTS["main"], height // 5), text_color=COLORS["text_secondary"])
 
 
 BackButton = CTkButton(LossMenu, text="Back", command=GameMenuBackButton, corner_radius=32,
@@ -739,7 +739,7 @@ BackButton = CTkButton(LossMenu, text="Back", command=GameMenuBackButton, corner
 LossLabel.pack(expand=True)
 BackButton.pack(expand=True)
 # === WinMenu ===
-WinLabel = CTkLabel(WinMenu, text="Gagnés !", font=(FONTS["main"], height // 5), text_color=COLORS["text_secondary"])
+WinLabel = CTkLabel(WinMenu, text="Gagné!", font=(FONTS["main"], height // 5), text_color=COLORS["text_secondary"])
 
 
 WinBackButton = CTkButton(WinMenu, text="Back", command=GameMenuBackButton, corner_radius=32,
