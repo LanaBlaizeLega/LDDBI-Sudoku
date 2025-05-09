@@ -265,28 +265,28 @@ def onButtonClicked(x,y):
                 i_x, i_y = x,y
                 i_sq = (i_x // 3) * 3 + i_y // 3
 
-        elif CurrentBtn == ArrayButton[x][y]:
-            for v in R_rep:
-                if GetBVal(CurrentBtn) == str(v):
-                    CurrentBtn.configure(fg_color = "red")
-                    break
-                CurrentBtn.configure(fg_color = 'white')
-            CurrentBtn = None
-        elif CurrentBtn != ArrayButton[x][y] and CurrentBtn != None:
-            for v in R_rep:
-                if GetBVal(CurrentBtn) == str(v):
-                    CurrentBtn.configure(fg_color = "red")
-                    break
-                CurrentBtn.configure(fg_color = 'white')
-            CurrentBtn = ArrayButton[x][y]
-            CurrentBtn.configure(fg_color = COLORS["bg_secondary"])
-            i_x, i_y = x,y
-            i_sq = (i_x // 3) * 3 + i_y // 3
-        else:
-            CurrentBtn = ArrayButton[x][y]
-            CurrentBtn.configure(fg_color = COLORS["bg_secondary"])
-            i_x, i_y = x,y
-            i_sq = (i_x // 3) * 3 + i_y // 3
+        #elif CurrentBtn == ArrayButton[x][y]:
+            #for v in R_rep:
+                #if GetBVal(CurrentBtn) == str(v):
+                    #CurrentBtn.configure(fg_color = "red")
+                    #break
+                #CurrentBtn.configure(fg_color = 'white')
+            #CurrentBtn = None
+        #elif CurrentBtn != ArrayButton[x][y] and CurrentBtn != None:
+            #for v in R_rep:
+                #if GetBVal(CurrentBtn) == str(v):
+                    #CurrentBtn.configure(fg_color = "red")
+                    #break
+                #CurrentBtn.configure(fg_color = 'white')
+            #CurrentBtn = ArrayButton[x][y]
+            #CurrentBtn.configure(fg_color = COLORS["bg_secondary"])
+            #i_x, i_y = x,y
+            #i_sq = (i_x // 3) * 3 + i_y // 3
+        #else:
+            #CurrentBtn = ArrayButton[x][y]
+            #CurrentBtn.configure(fg_color = COLORS["bg_secondary"])
+            #i_x, i_y = x,y
+            #i_sq = (i_x // 3) * 3 + i_y // 3
     if CurrentBtn:
         GetBtnPos(i_x,i_y,i_sq)
         CheckLogic()
@@ -326,43 +326,43 @@ def CheckRow(CurrentRow):
         RowSol = answerTab[i_x]
         if np.array_equal(CurrentRow,RowSol):
             return True  
-    else:
-        if err_count == 0:
-            R_err = None
+    #else:
+        #if err_count == 0:
+            #R_err = None
         #creer un array des indices des valeurs != 0
-        AU_i = np.argwhere(row)
-        print(AU_i)
-        AU = np.take(row, AU_i)
-        print(AU)
-        AU = AU.flatten()
+        #AU_i = np.argwhere(row)
+        #print(AU_i)
+        #AU = np.take(row, AU_i)
+        #print(AU)
+        #AU = AU.flatten()
 
         #Creer un NamedTuple contenant les valeurs et le nombres d'occurences. S'il y a des valeurs répétées, les renvoie
-        print(AU)
-        val, count = np.unique_counts(AU)
-        print(val, count)
-        R_rep = val[count > 1]
-        print(R_rep)
-        print(R_rep.size)
+        #print(AU)
+        #val, count = np.unique_counts(AU)
+        #print(val, count)
+        #R_rep = val[count > 1]
+        #print(R_rep)
+        #print(R_rep.size)
     
-        if R_rep.size > 0:
-            err_count += 1
-            R_err = True
-            print(R_err, R_rep.size)
-            for button in ArrayButton[i_x]:
-                for v in R_rep:
-                    if GetBVal(button) == str(v):
-                        b_text = button.cget("text")
-                        if b_text == str(v):
-                            button.configure(fg_color = "red")
-        elif R_err == True and R_rep.size == 0:
-            print(R_err)
-            for button in ArrayButton[i_x]:
-                button.configure(fg_color = "white")
-            R_err = False
-        print(R_err)
+        #if R_rep.size > 0:
+            #err_count += 1
+            #R_err = True
+            #print(R_err, R_rep.size)
+            #for button in ArrayButton[i_x]:
+                #for v in R_rep:
+                    #if GetBVal(button) == str(v):
+                        #b_text = button.cget("text")
+                        #if b_text == str(v):
+                           # button.configure(fg_color = "red")
+        #elif R_err == True and R_rep.size == 0:
+            #print(R_err)
+            #for button in ArrayButton[i_x]:
+                #button.configure(fg_color = "white")
+            #R_err = False
+        #print(R_err)
 
-        if len(val) == 9 and not R_err:
-            return True
+        #if len(val) == 9 and not R_err:
+            #return True
 
 def GetBVal(Btn):
     B_val = Btn.cget("text")
